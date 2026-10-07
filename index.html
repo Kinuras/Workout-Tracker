@@ -1,520 +1,826 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChronoFit - 20 Interval Workout Hub</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#fdf4f8',
-                            500: '#ec4899',
-                            600: '#db2777',
-                            900: '#831843',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- Google Fonts Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- FontAwesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>GCN-Style Structured Workout Tracker</title>
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        /* Custom smooth transitions */
-        .transition-all-custom { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        /* Pulse glow effect for high intensity */
-        @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
-            50% { box-shadow: 0 0 30px rgba(239, 68, 68, 0.8); }
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            
+            /* Intensity Colors 1-10 */
+            --lvl-1: #22c55e;
+            --lvl-2: #4ade80;
+            --lvl-3: #84cc16;
+            --lvl-4: #eab308;
+            --lvl-5: #facc15;
+            --lvl-6: #f97316;
+            --lvl-7: #ea580c;
+            --lvl-8: #dc2626;
+            --lvl-9: #ef4444;
+            --lvl-10: #b91c1c;
         }
-        .pulse-red { animation: pulse-glow 1.5s infinite; }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 24px;
+            max-width: 600px;
+        }
+
+        header h1 {
+            font-size: 1.75rem;
+            margin-bottom: 6px;
+            color: #fff;
+            letter-spacing: 0.5px;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+        }
+
+        /* Workout Selection List */
+        #workout-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .workout-card {
+            background-color: var(--card-bg);
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 18px 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .workout-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+        }
+
+        .workout-info h3 {
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+            color: #fff;
+        }
+
+        .workout-info p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .workout-meta {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+        }
+
+        .badge {
+            background: #334155;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Active Session Screen */
+        #active-session {
+            display: none;
+            background-color: var(--card-bg);
+            border: 2px solid #334155;
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            transition: border-color 0.4s ease;
+        }
+
+        .session-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 12px;
+        }
+
+        .back-btn {
+            background: #334155;
+            border: none;
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .back-btn:hover {
+            background: #475569;
+        }
+
+        .overall-timer-display {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Intensity Color Panel */
+        .intensity-banner {
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            color: #fff;
+            transition: background-color 0.4s ease, transform 0.2s ease;
+        }
+
+        .current-step-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .intensity-level-indicator {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            opacity: 0.9;
+        }
+
+        .section-timer {
+            font-size: 4rem;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .next-preview {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-top: 12px;
+        }
+
+        /* Progress Bar Across Whole Workout */
+        .progress-track {
+            background: #0f172a;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .progress-fill {
+            background: var(--accent);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s linear;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .ctrl-btn {
+            background: #334155;
+            color: #fff;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+        }
+
+        .ctrl-btn:hover {
+            background: #475569;
+        }
+
+        .ctrl-btn.primary {
+            background: var(--accent);
+        }
+
+        .ctrl-btn.primary:hover {
+            background: #2563eb;
+        }
+
+        /* Pulse animation for high intensity */
+        @keyframes pulse-red {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.01); box-shadow: 0 0 25px rgba(239, 68, 68, 0.4); }
+            100% { transform: scale(1.01); }
+        }
+
+        .pulsing {
+            animation: pulse-red 1.5s infinite;
+        }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 h-full flex flex-col selection:bg-pink-500 selection:text-white">
+<body>
 
-    <!-- Header -->
-    <header class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50 px-6 py-4 flex items-center justify-between">
-        <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-pink-500 to-rose-500 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-pink-500/30">
-                <i class="fa-solid fa-bolt"></i>
-            </div>
-            <div>
-                <h1 class="font-extrabold text-xl tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">ChronoFit Hub</h1>
-                <p class="text-xs text-slate-400 font-medium">20-Interval Multi-Intensity Circuit</p>
-            </div>
-        </div>
-        <div class="flex items-center space-x-4">
-            <button id="audioToggleBtn" onclick="toggleAudio()" class="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold flex items-center space-x-2 border border-slate-700 transition-all-custom">
-                <i id="audioIcon" class="fa-solid fa-volume-high text-pink-400"></i>
-                <span id="audioText">Sound: On</span>
-            </button>
-            <button onclick="resetAllWorkouts()" class="px-3 py-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-semibold flex items-center space-x-2 border border-rose-500/30 transition-all-custom">
-                <i class="fa-solid fa-rotate-right"></i>
-                <span>Reset All</span>
-            </button>
-        </div>
+    <header>
+        <h1>Structured Session Player</h1>
+        <p>Select a 30 or 40-minute GCN or HIIT session. Intervals flow automatically with audio cues and color indicators (1–10 intensity).</p>
     </header>
 
-    <!-- Main Content Container -->
-    <main class="flex-1 overflow-y-auto p-4 sm:p-8 max-w-7xl mx-auto w-full">
+    <div class="container">
+        <!-- Workout Selection Menu -->
+        <div id="workout-list">
+            <!-- Dynamically populated -->
+        </div>
 
-        <!-- Master Session Bar (Dashboard view) -->
-        <div id="masterSessionBar" class="mb-8 bg-gradient-to-r from-slate-900 to-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-2xl relative overflow-hidden">
-            <div class="absolute -right-10 -top-10 w-40 h-40 bg-pink-500/10 rounded-full blur-3xl pointer-events-none"></div>
-            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                <div>
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-pink-500/10 text-pink-400 border border-pink-500/20 mb-2">
-                        <i class="fa-regular fa-clock mr-1.5"></i> Full Circuit Session
-                    </span>
-                    <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-white">20-Workout Intensity Matrix</h2>
-                    <p class="text-slate-400 text-sm mt-1">15 standard intervals (30s) + 5 endurance intervals (40s). Total 20 distinct blocks.</p>
-                </div>
-                <div class="flex items-center gap-4 bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 w-full md:w-auto justify-between">
-                    <div>
-                        <div class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Total Session Time</div>
-                        <div id="totalSessionCountdown" class="text-3xl font-black text-white font-mono tracking-wider">--:--</div>
-                    </div>
-                    <div class="h-8 w-px bg-slate-800 mx-2"></div>
-                    <div class="text-right">
-                        <div class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Completed</div>
-                        <div id="completedCountDisplay" class="text-2xl font-bold text-pink-400 font-mono">0 / 20</div>
-                    </div>
-                </div>
+        <!-- Active Player Screen -->
+        <div id="active-session">
+            <div class="session-header">
+                <button class="back-btn" onclick="app.exitWorkout()">← Choose Another</button>
+                <div class="overall-timer-display" id="overall-timer-text">Total Remaining: 30:00</div>
             </div>
+
             <!-- Overall Progress Bar -->
-            <div class="mt-6 w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
-                <div id="overallProgressBar" class="bg-gradient-to-r from-pink-500 to-rose-500 h-full w-0 transition-all duration-300"></div>
+            <div class="progress-track">
+                <div class="progress-fill" id="overall-progress"></div>
+            </div>
+
+            <!-- Color Coded Step Banner -->
+            <div class="intensity-banner" id="intensity-banner">
+                <div class="current-step-title" id="step-name">Warm Up</div>
+                <div class="intensity-level-indicator" id="step-intensity-label">Intensity Level: 2 / 10</div>
+                <div class="section-timer" id="section-timer">00:30</div>
+                <div class="next-preview" id="next-preview-text">Up Next: Zone Increase</div>
+            </div>
+
+            <!-- Playback Controls -->
+            <div class="controls">
+                <button class="ctrl-btn" onclick="app.togglePause()" id="pause-btn">Pause</button>
+                <button class="ctrl-btn" onclick="app.restartStep()">Restart Step</button>
             </div>
         </div>
+    </div>
 
-        <!-- Dashboard Grid of 20 Workouts -->
-        <div id="dashboardView">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-list-check text-pink-500"></i> Select Workout Block to Focus
-                </h3>
-                <span class="text-xs text-slate-400">Click any card to isolate and launch player</span>
-            </div>
-            <div id="workoutGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                <!-- Injected via JavaScript -->
-            </div>
-        </div>
-
-        <!-- Focus Mode View (Hidden by default) -->
-        <div id="focusView" class="hidden max-w-3xl mx-auto py-4">
-            <div class="mb-6 flex items-center justify-between">
-                <button onclick="backToDashboard()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold flex items-center space-x-2 border border-slate-700 transition-all-custom">
-                    <i class="fa-solid fa-arrow-left"></i>
-                    <span>Back to Dashboard</span>
-                </button>
-                <div id="focusStatusBadge" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
-                    Intensity Level <span id="focusIntensityNum">1</span>
-                </div>
-            </div>
-
-            <div id="focusCardContainer" class="bg-slate-900 border-2 rounded-3xl p-8 shadow-2xl text-center relative overflow-hidden transition-all-custom">
-                <div id="focusCardGlow" class="absolute inset-0 opacity-10 pointer-events-none"></div>
-                
-                <span id="focusWorkoutIndex" class="text-xs font-bold uppercase tracking-widest text-slate-400">Workout #1</span>
-                <h2 id="focusWorkoutTitle" class="text-3xl sm:text-4xl font-black text-white mt-2 mb-1">Warmup Mobility</h2>
-                <p id="focusWorkoutDesc" class="text-slate-400 text-sm max-w-md mx-auto mb-8">Keep movements fluid and controlled.</p>
-
-                <!-- Big Countdown Display -->
-                <div class="my-8 py-8 bg-slate-950/60 rounded-2xl border border-slate-800/80 shadow-inner max-w-lg mx-auto relative">
-                    <div class="absolute top-3 right-4 text-xs font-mono text-slate-500" id="focusDurationLabel">Duration: 30s</div>
-                    <div id="focusTimerDisplay" class="text-7xl sm:text-8xl font-black font-mono tracking-tighter text-white">00:30</div>
-                    <div class="text-xs uppercase tracking-widest text-slate-400 mt-2 font-semibold" id="focusTimerStateLabel">Ready to Start</div>
-                </div>
-
-                <!-- Focus Progress Bar -->
-                <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden max-w-lg mx-auto mb-8">
-                    <div id="focusProgressBar" class="h-full w-full transition-all duration-300" style="width: 100%;"></div>
-                </div>
-
-                <!-- Controls -->
-                <div class="flex items-center justify-center gap-4 flex-wrap">
-                    <button id="focusStartBtn" onclick="togglePlayFocus()" class="px-8 py-4 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold text-lg shadow-lg shadow-pink-500/30 flex items-center space-x-3 transition-all-custom transform active:scale-95">
-                        <i id="focusPlayIcon" class="fa-solid fa-play"></i>
-                        <span id="focusPlayText">Start Workout</span>
-                    </button>
-                    <button onclick="resetCurrentWorkout()" class="px-6 py-4 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-sm border border-slate-700 transition-all-custom">
-                        <i class="fa-solid fa-rotate-right mr-2"></i> Reset Timer
-                    </button>
-                    <button onclick="skipCurrentWorkout()" class="px-6 py-4 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-sm border border-slate-700 transition-all-custom">
-                        <i class="fa-solid fa-forward-step mr-2"></i> Complete & Next
-                    </button>
-                </div>
-            </div>
-        </div>
-
-    </main>
-
-    <!-- Application Script -->
     <script>
-        // Data for 20 workouts: 15 are 30s, 5 are 40s (spread out)
-        const workoutsData = [
-            { id: 1, title: "Dynamic Mobility", intensity: 1, duration: 30, desc: "Gentle joint rotations & light stretching." },
-            { id: 2, title: "Light Walking Step", intensity: 2, duration: 30, desc: "Easy pace stepping in place." },
-            { id: 3, title: "Low Squat Pulses", intensity: 3, duration: 30, desc: "Controlled bodyweight squats." },
-            { id: 4, title: "Step Jacks", intensity: 4, duration: 30, desc: "Low impact jumping jacks variant." },
-            { id: 5, title: "Shadow Boxing", intensity: 5, duration: 40, desc: "Active punches with steady breathing." },
-            { id: 6, title: "Core Plank Hold", intensity: 6, duration: 30, desc: "Solid forearm plank stabilization." },
-            { id: 7, title: "High Knees (Jog)", intensity: 7, duration: 30, desc: "Moderate cardio cadence." },
-            { id: 8, title: "Speed Skaters", intensity: 8, duration: 40, desc: "Lateral bounding movements." },
-            { id: 9, title: "Power Mountain Climbers", intensity: 9, duration: 30, desc: "Fast-paced knee drives." },
-            { id: 10, title: "Max Sprint Burnout", intensity: 10, duration: 40, desc: "Maximum effort explosive movement!" },
-            { id: 11, title: "Active Recovery Pace", intensity: 2, duration: 30, desc: "Catch your breath with slow steps." },
-            { id: 12, title: "Standing Crunches", intensity: 4, duration: 30, desc: "Knee to elbow oblique engagement." },
-            { id: 13, title: "Lunges with Twist", intensity: 5, duration: 30, desc: "Alternating reverse lunges." },
-            { id: 14, title: "Bicycle Crunches", intensity: 6, duration: 40, desc: "Controlled abdominal cadence." },
-            { id: 15, title: "Jump Squats", intensity: 9, duration: 30, desc: "Explosive vertical power." },
-            { id: 16, title: "Rest & Hydrate", intensity: 1, duration: 30, desc: "Deep breathing and sip water." },
-            { id: 17, title: "Arm Circles & Reach", intensity: 3, duration: 30, desc: "Upper body mobility flow." },
-            { id: 18, title: "Fast Feet Drills", intensity: 7, duration: 30, desc: "Quick rapid foot taps." },
-            { id: 19, title: "Burpee Challenge", intensity: 10, duration: 40, desc: "Full body explosive conditioning." },
-            { id: 20, title: "Cool Down Stretch", intensity: 1, duration: 30, desc: "Deep relaxing static stretches." }
+        // Color Palette Map for Levels 1 to 10
+        const levelColors = {
+            1: '#22c55e', // Green
+            2: '#4ade80', 
+            3: '#84cc16', // Lime
+            4: '#eab308', 
+            5: '#facc15', // Yellow
+            6: '#f97316', // Orange
+            7: '#ea580c', 
+            8: '#dc2626', // Red-Orange
+            9: '#ef4444', // Red
+            10: '#b91c1c'  // Deep Max Red
+        };
+
+        // 20 Structured Workouts (Mix of 30 min and 40 min sessions)
+        const workouts = [
+            {
+                id: 1, name: "GCN Classic Pyramid Builder", duration: 30, type: "30-min Cycling",
+                description: "Gradual ramp from green warm-up up to 10/10 red peak, then stepped descent.",
+                steps: [
+                    { name: "Easy Spin Warm-up", level: 2, duration: 180 },
+                    { name: "Building Pace", level: 4, duration: 180 },
+                    { name: "Tempo Effort", level: 6, duration: 180 },
+                    { name: "Hard Threshold", level: 8, duration: 180 },
+                    { name: "Max Sprint Peak", level: 10, duration: 120 },
+                    { name: "Recovery Spin", level: 3, duration: 180 },
+                    { name: "Steady Chase", level: 6, duration: 240 },
+                    { name: "Final Push", level: 9, duration: 120 },
+                    { name: "Cool Down Spin", level: 1, duration: 300 }
+                ]
+            },
+            {
+                id: 2, name: "HIIT Micro-Burst Burner", duration: 30, type: "30-min HIIT",
+                description: "Fast-alternating intervals shifting between active recovery and high gear surges.",
+                steps: [
+                    { name: "Warm Up", level: 2, duration: 300 },
+                    { name: "Surge 1", level: 8, duration: 60 },
+                    { name: "Recovery", level: 2, duration: 120 },
+                    { name: "Surge 2", level: 9, duration: 60 },
+                    { name: "Recovery", level: 2, duration: 120 },
+                    { name: "Surge 3", level: 10, duration: 60 },
+                    { name: "Recovery", level: 2, duration: 120 },
+                    { name: "Surge 4", level: 9, duration: 60 },
+                    { name: "Recovery", level: 2, duration: 120 },
+                    { name: "Surge 5", level: 10, duration: 60 },
+                    { name: "Midpoint Cruise", level: 4, duration: 300 },
+                    { name: "Surge 6", level: 8, duration: 60 },
+                    { name: "Recovery", level: 2, duration: 90 },
+                    { name: "Surge 7", level: 9, duration: 60 },
+                    { name: "Recovery", level: 2, duration: 90 },
+                    { name: "All Out Finale", level: 10, duration: 60 },
+                    { name: "Cool Down", level: 1, duration: 270 }
+                ]
+            },
+            {
+                id: 3, name: "Threshold Sweet Spot Session", duration: 30, type: "30-min Cycling",
+                description: "Sustained orange and yellow intervals to build aerobic engine capacity.",
+                steps: [
+                    { name: "Spin Warm Up", level: 2, duration: 300 },
+                    { name: "Sweet Spot Block 1", level: 6, duration: 300 },
+                    { name: "Active Rest", level: 3, duration: 120 },
+                    { name: "Sweet Spot Block 2", level: 7, duration: 300 },
+                    { name: "Active Rest", level: 3, duration: 120 },
+                    { name: "Threshold Push", level: 8, duration: 180 },
+                    { name: "Spin Recovery", level: 3, duration: 120 },
+                    { name: "Cool Down", level: 1, duration: 360 }
+                ]
+            },
+            {
+                id: 4, name: "Rolling Hills Simulation", duration: 40, type: "40-min Endurance",
+                description: "Simulated outdoor terrain with long climbs and valley recoveries.",
+                steps: [
+                    { name: "Flat Road Warm Up", level: 2, duration: 300 },
+                    { name: "Gentle Foothills", level: 4, duration: 300 },
+                    { name: "Climbing Grade 1", level: 6, duration: 300 },
+                    { name: "Steep Climb Grade 2", level: 8, duration: 240 },
+                    { name: "Summit Peak", level: 9, duration: 120 },
+                    { name: "Fast Descent (Recovery)", level: 2, duration: 300 },
+                    { name: "Second Climb Attack", level: 7, duration: 300 },
+                    { name: "Steep Peak Push", level: 10, duration: 180 },
+                    { name: "Valley Recovery", level: 3, duration: 300 },
+                    { name: "Final Roll", level: 5, duration: 300 },
+                    { name: "Easy Spin Cool Down", level: 1, duration: 360 }
+                ]
+            },
+            {
+                id: 5, name: "Tabata Extreme Engine", duration: 30, type: "30-min HIIT",
+                description: "High-intensity bursts with strict short recoveries.",
+                steps: [
+                    { name: "Dynamic Warm Up", level: 2, duration: 360 },
+                    { name: "Tabata Block (20s On / 10s Off x 8)", level: 10, duration: 160 },
+                    { name: "Mid-Session Recovery", level: 2, duration: 300 },
+                    { name: "Tabata Block 2", level: 10, duration: 160 },
+                    { name: "Flush Out", level: 3, duration: 300 },
+                    { name: "Power Surge", level: 9, duration: 120 },
+                    { name: "Cool Down", level: 1, duration: 300 }
+                ]
+            },
+            {
+                id: 6, name: "Endurance Base Builder", duration: 40, type: "40-min Endurance",
+                description: "Consistent green and yellow zone focus to build aerobic stamina.",
+                steps: [
+                    { name: "Easy Spin", level: 2, duration: 600 },
+                    { name: "Steady Aerobic Pace", level: 4, duration: 900 },
+                    { name: "Tempo Block", level: 5, duration: 600 },
+                    { name: "Aerobic Cruise", level: 3, duration: 600 },
+                    { name: "Cool Down", level: 1, duration: 300 }
+                ]
+            },
+            {
+                id: 7, name: "V02 Max Power Builder", duration: 30, type: "30-min Cycling",
+                description: "Hard effort repeats designed to raise ceiling performance limits.",
+                steps: [
+                    { name: "Warm Up", level: 2, duration: 300 },
+                    { name: "VO2 Interval 1", level: 9, duration: 180 },
+                    { name: "Recovery", level: 2, duration: 180 },
+                    { name: "VO2 Interval 2", level: 9, duration: 180 },
+                    { name: "Recovery", level: 2, duration: 180 },
+                    { name: "VO2 Interval 3", level: 10, duration: 180 },
+                    { name: "Recovery", level: 2, duration: 180 },
+                    { name: "VO2 Interval 4", level: 10, duration: 180 },
+                    { name: "Cool Down", level: 1, duration: 300 }
+                ]
+            },
+            {
+                id: 8, name: "Cadence Quickness Drill", duration: 30, type: "30-min Cycling",
+                description: "Fast leg speeds mixed with heavy resistance blocks.",
+                steps: [
+                    { name: "Warm Up Spin", level: 2, duration: 300 },
+                    { name: "High Cadence Spin", level: 4, duration: 240 },
+                    { name: "Heavy Torque Push", level: 7, duration: 180 },
+                    { name: "Spin Recovery", level: 2, duration: 180 },
+                    { name: "High Cadence Spin 2", level: 5, duration: 240 },
+                    { name: "Heavy Torque Push 2", level: 8, duration: 180 },
+                    { name: "Spin Recovery", level: 2, duration: 180 },
+                    { name: "Max Leg Speed Sprint", level: 9, duration: 120 },
+                    { name: "Cool Down", level: 1, duration: 300 }
+                ]
+            },
+            {
+                id: 9, name: "The Grand Tour Stage Simulation", duration: 40, type: "40-min Endurance",
+                description: "Long flat chase leading into a massive final mountain climb.",
+                steps: [
+                    { name: "Neutral Rollout", level: 2, duration: 600 },
+                    { name: "Breakaway Chase", level: 6, duration: 600 },
+                    { name: "Peloton Lull", level: 3, duration: 300 },
+                    { name: "Base of Mountain", level: 5, duration: 300 },
+                    { name: "Climbing Step Up", level: 7, duration: 300 },
+                    { name: "Category 1 Ascent", level: 9, duration: 300 },
+                    { name: "Summit Attack", level: 10, duration: 180 },
+                    { name: "Cool Down Descent", level: 1, duration: 520 }
+                ]
+            },
+            {
+                id: 10, name: "Fast & Furious 30-Min Blast", duration: 30, type: "30-min HIIT",
+                description: "Punchy, fast-paced intervals with minimal downtime.",
+                steps: [
+                    { name: "Quick Warm Up", level: 2, duration: 180 },
+                    { name: "Ramp Up", level: 5, duration: 180 },
+                    { name: "Interval Burst 1", level: 8, duration: 120 },
+                    { name: "Recovery", level: 3, duration: 60 },
+                    { name: "Interval Burst 2", level: 9, duration: 120 },
+                    { name: "Recovery", level: 3, duration: 60 },
+                    { name: "Interval Burst 3", level: 10, duration: 120 },
+                    { name: "Recovery", level: 3, duration: 60 },
+                    { name: "Interval Burst 4", level: 9, duration: 120 },
+                    { name: "Recovery", level: 3, duration: 60 },
+                    { name: "Interval Burst 5", level: 10, duration: 120 },
+                    { name: "Recovery", level: 3, duration: 60 },
+                    { name: "Sustained Chase", level: 7, duration: 300 },
+                    { name: "Cool Down", level: 1, duration: 300 }
+                ]
+            },
+            {
+                id: 11, name: "Endurance Pyramid 40", duration: 40, type: "40-min Endurance",
+                description: "Wide pyramid scaling from level 1 up to 10 and back down gracefully.",
+                steps: [
+                    { name: "Base Spin", level: 1, duration: 300 },
+                    { name: "Ramp Up Lvl 2", level: 2, duration: 300 },
+                    { name: "Ramp Up Lvl 4", level: 4, duration: 300 },
+                    { name: "Ramp Up Lvl 6", level: 6, duration: 300 },
+                    { name: "Peak Effort Lvl 8", level: 8, duration: 300 },
+                    { name: "Summit Lvl 10", level: 10, duration: 180 },
+                    { name: "Descent Lvl 8", level: 8, duration: 180 },
+                    { name: "Descent Lvl 6", level: 6, duration: 300 },
+                    { name: "Descent Lvl 4", level: 4, duration: 300 },
+                    { name: "Descent Lvl 2", level: 2, duration: 300 },
+                    { name: "Easy Out", level: 1, duration: 340 }
+                ]
+            },
+            {
+                id: 12, name: "Symptom of Speed 30", duration: 30, type: "30-min HIIT",
+                description: "Repeated fast sprints targeting explosive power output.",
+                steps: [
+                    { name: "Warm Up", level: 2, duration: 300 },
+                    { name: "Sprint 1", level: 10, duration: 45 },
+                    { name: "Float", level: 2, duration: 135 },
+                    { name: "Sprint 2", level: 10, duration: 45 },
+                    { name: "Float", level: 2, duration: 135 },
+                    { name: "Sprint 3", level: 10, duration: 45 },
+                    { name: "Float", level: 2, duration: 135 },
+                    { name: "Sprint 4", level: 10, duration: 45 },
+                    { name: "Float", level: 2, duration: 135 },
+                    { name: "Tempo Block", level: 6, duration: 300 },
+                    { name: "Sprint 5", level: 10, duration: 45 },
+                    { name: "Float", level: 2, duration: 135 },
+                    { name: "Sprint 6", level: 10, duration: 45 },
+                    { name: "Float", level: 2, duration: 135 },
+                    { name: "Cool Down", level: 1, duration: 315 }
+                ]
+            },
+            {
+                id: 13, name: "Threshold Builder 40", duration: 40, type: "40-min Endurance",
+                description: "Long sustained efforts right below threshold to expand FTP.",
+                steps: [
+                    { name: "Warm Up", level: 2, duration: 600 },
+                    { name: "Block 1 (@ Level 6)", level: 6, duration: 600 },
+                    { name: "Recovery Spin", level: 3, duration: 300 },
+                    { name: "Block 2 (@ Level 7)", level: 7, duration: 600 },
+                    { name: "Recovery Spin", level: 3, duration: 300 },
+                    { name: "Final Power Push", level: 8, duration: 300 },
+                    { name: "Cool Down", level: 1, duration: 400 }
+                ]
+            },
+            {
+                id: 14, name: "Mixed Terrain Burner 30", duration: 30, type: "30-min Cycling",
+                description: "Constant variation in resistance and pacing.",
+                steps: [
+                    { name: "Warm Up", level: 2, duration: 240 },
+                    { name: "Roller 1", level: 5, duration: 180 },
+                    { name: "Recovery", level: 2, duration: 120 },
+                    { name: "Roller 2", level: 7, duration: 180 },
+                    { name: "Recovery", level: 2, duration: 120 },
+                    { name: "Roller 3", level: 9, duration: 180 },
+                    { name: "Recovery", level: 3, duration: 120 },
+                    { name: "Roller 4", level: 6, duration: 240 },
+                    { name: "Surge", level: 8, duration: 180 },
+                    { name: "Cool Down", level: 1, duration: 300 }
+                ]
+            },
+            {
+                id: 15, name: "Endurance Core Pace 40", duration: 40, type: "40-min Endurance",
+                description: "Solid mid-range pacing with structured tempo changes.",
+                steps: [
+                    { name: "Warm Up", level: 2, duration: 500 },
+                    { name: "Pace Step 1", level: 4, duration: 600 },
+                    { name: "Pace Step 2", level: 5, duration: 600 },
+                    { name: "Pace Step 3", level: 6, duration: 600 },
+                    { name: "Pace Step 4", level: 5, duration: 500 },
+                    { name: "Cool Down", level: 1, duration: 600 }
+                ]
+            },
+            {
+                id: 16, name: "Power Climb & Descend 30", duration: 30, type: "30-min Cycling",
+                description: "Steep climbs followed by active breathing recoveries.",
+                steps: [
+                    { name: "Warm Up", level: 2, duration: 300 },
+                    { name: "Climb 1", level: 7, duration: 300 },
+                    { name: "Descent", level: 2, duration: 180 },
+                    { name: "Climb 2", level: 8, duration: 300 },
+                    { name: "Descent", level: 2, duration: 180 },
+                    { name: "Climb 3 (Peak)", level: 10, duration: 180 },
+                    { name: "Descent", level: 3, duration: 180 },
+                    { name: "Cool Down", level: 1, duration: 380 }
+                ]
+            },
+            {
+                id: 17, name: "HIIT Ladder 30", duration: 30, type: "30-min HIIT",
+                description: "Escalating work intervals with steady recoveries.",
+                steps: [
+                    { name: "Warm Up", level: 2, duration: 300 },
+                    { name: "Step 1 (30s)", level: 8, duration: 30 },
+                    { name: "Rest", level: 2, duration: 90 },
+                    { name: "Step 2 (60s)", level: 8, duration: 60 },
+                    { name: "Rest", level: 2, duration: 90 },
+                    { name: "Step 3 (90s)", level: 9, duration: 90 },
+                    { name: "Rest", level: 2, duration: 90 },
+                    { name: "Step 4 (120s)", level: 9, duration: 120 },
+                    { name: "Rest", level: 2, duration: 120 },
+                    { name: "Step 5 (Max 60s)", level: 10, duration: 60 },
+                    { name: "Flush", level: 3, duration: 300 },
+                    { name: "Cool Down", level: 1, duration: 390 }
+                ]
+            },
+            {
+                id: 18, name: "Endurance Horizon 40", duration: 40, type: "40-min Endurance",
+                description: "Long steady endurance ride with alternating cadence zones.",
+                steps: [
+                    { name: "Easy Spin", level: 2, duration: 600 },
+                    { name: "Steady Zone 1", level: 4, duration: 600 },
+                    { name: "Tempo Surge", level: 6, duration: 300 },
+                    { name: "Steady Zone 2", level: 4, duration: 600 },
+                    { name: "Tempo Surge 2", level: 7, duration: 300 },
+                    { name: "Endurance Cruise", level: 3, duration: 600 },
+                    { name: "Cool Down", level: 1, duration: 400 }
+                ]
+            },
+            {
+                id: 19, name: "Sprint Factory 30", duration: 30, type: "30-min HIIT",
+                description: "Short powerful bursts designed to test top speed.",
+                steps: [
+                    { name: "Warm Up", level: 2, duration: 360 },
+                    { name: "Fast Effort 1", level: 9, duration: 60 },
+                    { name: "Easy", level: 2, duration: 120 },
+                    { name: "Fast Effort 2", level: 10, duration: 60 },
+                    { name: "Easy", level: 2, duration: 120 },
+                    { name: "Fast Effort 3", level: 9, duration: 60 },
+                    { name: "Easy", level: 2, duration: 120 },
+                    { name: "Fast Effort 4", level: 10, duration: 60 },
+                    { name: "Easy", level: 2, duration: 120 },
+                    { name: "Tempo Ride", level: 5, duration: 300 },
+                    { name: "All-Out Finisher", level: 10, duration: 60 },
+                    { name: "Cool Down", level: 1, duration: 420 }
+                ]
+            },
+            {
+                id: 20, name: "The Ultimate Finisher 40", duration: 40, type: "40-min Endurance",
+                description: "A complete structured tour containing warm-up, mid-climbs, and hard finish.",
+                steps: [
+                    { name: "Warm Up", level: 2, duration: 600 },
+                    { name: "Tempo Build", level: 5, duration: 600 },
+                    { name: "Hard Effort", level: 7, duration: 400 },
+                    { name: "Recovery", level: 3, duration: 300 },
+                    { name: "Attack Phase", level: 9, duration: 300 },
+                    { name: "Recovery", level: 3, duration: 200 },
+                    { name: "Max Sprint Out", level: 10, duration: 120 },
+                    { name: "Cool Down", level: 1, duration: 580 }
+                ]
+            }
         ];
 
-        // State variables
-        let workouts = workoutsData.map(w => ({
-            ...w,
-            remaining: w.duration,
-            status: 'pending' // 'pending', 'active', 'completed'
-        }));
+        class WorkoutApp {
+            constructor() {
+                this.currentWorkout = null;
+                this.currentStepIndex = 0;
+                this.timeLeftInStep = 0;
+                this.totalTimeLeft = 0;
+                this.totalWorkoutDuration = 0;
+                this.timerInterval = null;
+                this.isPaused = false;
+                this.audioCtx = null;
 
-        let activeWorkoutId = null;
-        let isRunning = false;
-        let timerInterval = null;
-        let soundEnabled = true;
-        let audioCtx = null;
+                this.initList();
+            }
 
-        // Color mapping based on intensity 1 to 10
-        // 1: Green, 2-3: Yellow-Green, 4-6: Yellow/Orange, 7-8: Orange/Red, 9-10: Intense Red
-        function getIntensityColor(intensity) {
-            if (intensity <= 2) return {
-                bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', text: 'text-emerald-400', badge: 'bg-emerald-500', bar: 'bg-emerald-500', glow: 'rgba(16, 185, 129, 0.4)'
-            };
-            if (intensity <= 4) return {
-                bg: 'bg-lime-500/10', border: 'border-lime-500/30', text: 'text-lime-400', badge: 'bg-lime-500', bar: 'bg-lime-500', glow: 'rgba(132, 204, 22, 0.4)'
-            };
-            if (intensity <= 6) return {
-                bg: 'bg-amber-500/10', border: 'border-amber-500/30', text: 'text-amber-400', badge: 'bg-amber-500', bar: 'bg-amber-500', glow: 'rgba(245, 158, 11, 0.4)'
-            };
-            if (intensity <= 8) return {
-                bg: 'bg-orange-500/10', border: 'border-orange-500/30', text: 'text-orange-400', badge: 'bg-orange-500', bar: 'bg-orange-500', glow: 'rgba(249, 115, 22, 0.4)'
-            };
-            return {
-                bg: 'bg-rose-500/10', border: 'border-rose-500/30', text: 'text-rose-400', badge: 'bg-rose-500', bar: 'bg-rose-500', glow: 'rgba(244, 63, 94, 0.6)'
-            };
-        }
-
-        // Web Audio API beep sound generator
-        function playBeep(frequency = 600, type = 'sine', duration = 0.15) {
-            if (!soundEnabled) return;
-            try {
-                if (!audioCtx) {
-                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            initAudio() {
+                if (!this.audioCtx) {
+                    this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 }
-                if (audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = type;
-                osc.frequency.value = frequency;
-                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + duration);
-            } catch (e) {
-                console.log('Audio error:', e);
-            }
-        }
-
-        function toggleAudio() {
-            soundEnabled = !soundEnabled;
-            const icon = document.getElementById('audioIcon');
-            const text = document.getElementById('audioText');
-            if (soundEnabled) {
-                icon.className = "fa-solid fa-volume-high text-pink-400";
-                text.innerText = "Sound: On";
-                playBeep(800, 'sine', 0.1);
-            } else {
-                icon.className = "fa-solid fa-volume-xmark text-slate-500";
-                text.innerText = "Sound: Off";
-            }
-        }
-
-        // Initialize and render Dashboard
-        function renderDashboard() {
-            const grid = document.getElementById('workoutGrid');
-            grid.innerHTML = '';
-
-            workouts.forEach((w) => {
-                const colors = getIntensityColor(w.intensity);
-                const isCompleted = w.status === 'completed';
-                const isActive = w.status === 'active';
-
-                const card = document.createElement('div');
-                card.className = `rounded-2xl border ${colors.border} ${colors.bg} p-4 flex flex-col justify-between cursor-pointer hover:scale-[1.02] transition-all-custom relative overflow-hidden group shadow-lg`;
-                
-                if (isCompleted) {
-                    card.classList.add('opacity-60', 'border-slate-800', 'bg-slate-900/40');
-                }
-
-                card.onclick = () => selectWorkout(w.id);
-
-                card.innerHTML = `
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-xs font-mono font-bold text-slate-400">#${w.id}</span>
-                            <span class="px-2 py-0.5 rounded-full text-xs font-bold text-white ${colors.badge}">
-                                Lvl ${w.intensity}
-                            </span>
-                        </div>
-                        <h4 class="font-bold text-white text-sm sm:text-base group-hover:text-pink-400 transition-colors">${w.title}</h4>
-                        <p class="text-xs text-slate-400 mt-1 line-clamp-2">${w.desc}</p>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between">
-                        <span class="text-xs font-mono text-slate-300"><i class="fa-regular fa-clock mr-1 text-slate-400"></i>${w.remaining}s</span>
-                        <div>
-                            ${isCompleted ? '<span class="text-xs font-bold text-emerald-400"><i class="fa-solid fa-check mr-1"></i>Done</span>' : 
-                              isActive ? '<span class="text-xs font-bold text-pink-400 animate-pulse">Active</span>' : 
-                              '<span class="text-xs font-medium text-slate-400 group-hover:text-white">Start <i class="fa-solid fa-arrow-right ml-1"></i></span>'}
-                        </div>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
-
-            updateMasterDisplay();
-        }
-
-        // Update Master Session Progress & Total Time
-        function updateMasterDisplay() {
-            let totalRemaining = 0;
-            let completedCount = 0;
-
-            workouts.forEach(w => {
-                totalRemaining += w.remaining;
-                if (w.status === 'completed') completedCount++;
-            });
-
-            const mins = Math.floor(totalRemaining / 60);
-            const secs = totalRemaining % 60;
-            document.getElementById('totalSessionCountdown.innerText', `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`);
-            document.getElementById('totalSessionCountdown').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-            document.getElementById('completedCountDisplay').innerText = `${completedCount} / 20`;
-
-            const percent = (completedCount / 20) * 100;
-            document.getElementById('overallProgressBar').style.width = `${percent}%`;
-        }
-
-        // Select and Focus on a Workout
-        function selectWorkout(id) {
-            pauseTimer();
-            activeWorkoutId = id;
-            const w = workouts.find(item => item.id === id);
-            if (!w) return;
-
-            // Hide dashboard, show focus view
-            document.getElementById('dashboardView').classList.add('hidden');
-            document.getElementById('masterSessionBar').classList.add('hidden');
-            document.getElementById('focusView').classList.remove('hidden');
-
-            updateFocusViewUI();
-        }
-
-        function backToDashboard() {
-            pauseTimer();
-            activeWorkoutId = null;
-            document.getElementById('focusView').classList.add('hidden');
-            document.getElementById('dashboardView').classList.remove('hidden');
-            document.getElementById('masterSessionBar').classList.remove('hidden');
-            renderDashboard();
-        }
-
-        function updateFocusViewUI() {
-            const w = workouts.find(item => item.id === activeWorkoutId);
-            if (!w) return;
-
-            const colors = getIntensityColor(w.intensity);
-            
-            document.getElementById('focusWorkoutIndex').innerText = `Workout #${w.id} of 20`;
-            document.getElementById('focusWorkoutTitle').innerText = w.title;
-            document.getElementById('focusWorkoutDesc').innerText = w.desc;
-            document.getElementById('focusDurationLabel').innerText = `Duration: ${w.duration}s`;
-            document.getElementById('focusIntensityNum').innerText = w.intensity;
-
-            const container = document.getElementById('focusCardContainer');
-            container.className = `bg-slate-900 border-2 ${colors.border} rounded-3xl p-8 shadow-2xl text-center relative overflow-hidden transition-all-custom`;
-            if (w.intensity >= 9) {
-                container.classList.add('pulse-red');
-            } else {
-                container.classList.remove('pulse-red');
             }
 
-            document.getElementById('focusCardGlow').style.backgroundColor = colors.glow;
-            document.getElementById('focusStatusBadge').className = `px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-white ${colors.badge}`;
-            document.getElementById('focusProgressBar').className = `h-full transition-all duration-300 ${colors.bar}`;
-
-            formatTimerDisplay();
-        }
-
-        function formatTimerDisplay() {
-            const w = workouts.find(item => item.id === activeWorkoutId);
-            if (!w) return;
-
-            const mins = Math.floor(w.remaining / 60);
-            const secs = w.remaining % 60;
-            document.getElementById('focusTimerDisplay').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-
-            const percent = (w.remaining / w.duration) * 100;
-            document.getElementById('focusProgressBar').style.width = `${percent}%`;
-
-            if (w.status === 'completed') {
-                document.getElementById('focusTimerStateLabel').innerText = "Workout Completed!";
-                document.getElementById('focusTimerStateLabel').className = "text-xs uppercase tracking-widest text-emerald-400 mt-2 font-semibold";
-            } else if (isRunning) {
-                document.getElementById('focusTimerStateLabel').innerText = "Active Intensity Phase";
-                document.getElementById('focusTimerStateLabel').className = "text-xs uppercase tracking-widest text-pink-400 mt-2 font-semibold animate-pulse";
-            } else {
-                document.getElementById('focusTimerStateLabel').innerText = "Paused / Ready";
-                document.getElementById('focusTimerStateLabel').className = "text-xs uppercase tracking-widest text-slate-400 mt-2 font-semibold";
-            }
-        }
-
-        // Timer Execution Controls
-        function togglePlayFocus() {
-            if (isRunning) {
-                pauseTimer();
-            } else {
-                startTimer();
-            }
-        }
-
-        function startTimer() {
-            const w = workouts.find(item => item.id === activeWorkoutId);
-            if (!w) return;
-            if (w.remaining <= 0) {
-                w.remaining = w.duration;
-            }
-
-            w.status = 'active';
-            isRunning = true;
-
-            document.getElementById('focusPlayIcon').className = "fa-solid fa-pause";
-            document.getElementById('focusPlayText').innerText = "Pause Workout";
-
-            playBeep(440, 'sine', 0.1);
-
-            clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                if (w.remaining > 0) {
-                    w.remaining--;
-                    // Beep on final 3 seconds
-                    if (w.remaining > 0 && w.remaining <= 3) {
-                        playBeep(880, 'triangle', 0.1);
+            playBeep(frequency = 587.33, duration = 0.15, type = 'sine') {
+                try {
+                    this.initAudio();
+                    if (this.audioCtx.state === 'suspended') {
+                        this.audioCtx.resume();
                     }
-                    formatTimerDisplay();
+                    const osc = this.audioCtx.createOscillator();
+                    const gain = this.audioCtx.createGain();
+                    osc.type = type;
+                    osc.frequency.value = frequency;
+                    gain.gain.setValueAtTime(0.15, this.audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, this.audioCtx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.audioCtx.destination);
+                    osc.start();
+                    osc.stop(this.audioCtx.currentTime + duration);
+                } catch (e) {
+                    console.log("Audio not allowed yet");
+                }
+            }
+
+            initList() {
+                const listEl = document.getElementById('workout-list');
+                listEl.innerHTML = '';
+
+                workouts.forEach(w => {
+                    const card = document.createElement('div');
+                    card.className = 'workout-card';
+                    card.innerHTML = `
+                        <div class="workout-info">
+                            <h3>${w.id}. ${w.name}</h3>
+                            <p>${w.description}</p>
+                        </div>
+                        <div class="workout-meta">
+                            <span class="badge" style="background: #3b82f6; color: white;">${w.duration} Mins</span>
+                            <span class="badge" style="background: #334155; color: #cbd5e1;">${w.steps.length} Steps</span>
+                        </div>
+                    `;
+                    card.onclick = () => this.startWorkout(w);
+                    listEl.appendChild(card);
+                });
+            }
+
+            startWorkout(workout) {
+                this.currentWorkout = workout;
+                this.currentStepIndex = 0;
+                this.isPaused = false;
+                document.getElementById('pause-btn').innerText = "Pause";
+
+                // Calculate total duration in seconds
+                this.totalWorkoutDuration = workout.steps.reduce((acc, step) => acc + step.duration, 0);
+                this.totalTimeLeft = this.totalWorkoutDuration;
+
+                // Toggle views
+                document.getElementById('workout-list').style.display = 'none';
+                document.getElementById('active-session').style.display = 'block';
+
+                this.loadStep(0);
+                this.startTimer();
+            }
+
+            loadStep(index) {
+                const step = this.currentWorkout.steps[index];
+                this.timeLeftInStep = step.duration;
+
+                // Update UI elements
+                document.getElementById('step-name').innerText = step.name;
+                document.getElementById('step-intensity-label').innerText = `Intensity Level: ${step.level} / 10`;
+                
+                // Color banner styling
+                const banner = document.getElementById('intensity-banner');
+                const colorHex = levelColors[step.level] || '#3b82f6';
+                banner.style.backgroundColor = colorHex;
+
+                if (step.level >= 9) {
+                    banner.classList.add('pulsing');
+                } else {
+                    banner.classList.remove('pulsing');
                 }
 
-                if (w.remaining <= 0) {
-                    clearInterval(timerInterval);
-                    isRunning = false;
-                    w.status = 'completed';
-                    playBeep(1200, 'square', 0.4); // Completion fanfare beep
-                    
-                    document.getElementById('focusPlayIcon').className = "fa-solid fa-play";
-                    document.getElementById('focusPlayText').innerText = "Restart Workout";
-                    formatTimerDisplay();
-                    updateMasterDisplay();
+                // Next step preview
+                const nextPreviewEl = document.getElementById('next-preview-text');
+                if (index + 1 < this.currentWorkout.steps.length) {
+                    const nextStep = this.currentWorkout.steps[index + 1];
+                    nextPreviewEl.innerText = `Up Next: ${nextStep.name} (Lvl ${nextStep.level}) - ${this.formatTime(nextStep.duration)}`;
+                } else {
+                    nextPreviewEl.innerText = `Final Step of Session!`;
+                }
 
-                    // Automatically prompt transition to next workout after brief pause
-                    setTimeout(() => {
-                        if (activeWorkoutId < 20) {
-                            selectWorkout(activeWorkoutId + 1);
-                            startTimer();
+                this.updateDisplay();
+            }
+
+            startTimer() {
+                if (this.timerInterval) clearInterval(this.timerInterval);
+
+                this.timerInterval = setInterval(() => {
+                    if (this.isPaused) return;
+
+                    if (this.timeLeftInStep > 0) {
+                        // Countdown beeps in last 3 seconds of step
+                        if (this.timeLeftInStep <= 4 && this.timeLeftInStep > 1) {
+                            this.playBeep(440, 0.1, 'sine');
+                        } else if (this.timeLeftInStep === 1) {
+                            this.playBeep(880, 0.2, 'triangle'); // Higher pitch transition cue
                         }
-                    }, 1500);
-                }
-            }, 1000);
 
-            formatTimerDisplay();
+                        this.timeLeftInStep--;
+                        this.totalTimeLeft--;
+                        this.updateDisplay();
+                    } else {
+                        // Move to next step or finish
+                        this.currentStepIndex++;
+                        if (this.currentStepIndex < this.currentWorkout.steps.length) {
+                            this.loadStep(this.currentStepIndex);
+                        } else {
+                            this.finishWorkout();
+                        }
+                    }
+                }, 1000);
+            }
+
+            updateDisplay() {
+                // Section timer
+                document.getElementById('section-timer').innerText = this.formatTime(this.timeLeftInStep);
+
+                // Overall timer
+                document.getElementById('overall-timer-text').innerText = `Total Remaining: ${this.formatTime(this.totalTimeLeft)}`;
+
+                // Progress bar
+                const elapsed = this.totalWorkoutDuration - this.totalTimeLeft;
+                const percent = (elapsed / this.totalWorkoutDuration) * 100;
+                document.getElementById('overall-progress').style.width = `${percent}%`;
+            }
+
+            formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            }
+
+            togglePause() {
+                this.isPaused = !this.isPaused;
+                document.getElementById('pause-btn').innerText = this.isPaused ? "Resume" : "Pause";
+            }
+
+            restartStep() {
+                const step = this.currentWorkout.steps[this.currentStepIndex];
+                // Adjust total time left balance
+                this.totalTimeLeft += (step.duration - this.timeLeftInStep);
+                this.timeLeftInStep = step.duration;
+                this.updateDisplay();
+            }
+
+            exitWorkout() {
+                if (this.timerInterval) clearInterval(this.timerInterval);
+                document.getElementById('active-session').style.display = 'none';
+                document.getElementById('workout-list').style.display = 'grid';
+            }
+
+            finishWorkout() {
+                if (this.timerInterval) clearInterval(this.timerInterval);
+                this.playBeep(523.25, 0.2);
+                setTimeout(() => this.playBeep(659.25, 0.2), 200);
+                setTimeout(() => this.playBeep(783.99, 0.4), 400);
+
+                alert("🎉 Workout Completed Successfully!");
+                this.exitWorkout();
+            }
         }
 
-        function pauseTimer() {
-            isRunning = false;
-            clearInterval(timerInterval);
-            document.getElementById('focusPlayIcon').className = "fa-solid fa-play";
-            document.getElementById('focusPlayText').innerText = "Resume Workout";
-            formatTimerDisplay();
-        }
-
-        function resetCurrentWorkout() {
-            pauseTimer();
-            const w = workouts.find(item => item.id === activeWorkoutId);
-            if (w) {
-                w.remaining = w.duration;
-                w.status = 'pending';
-            }
-            playBeep(300, 'sine', 0.1);
-            formatTimerDisplay();
-            updateMasterDisplay();
-        }
-
-        function skipCurrentWorkout() {
-            pauseTimer();
-            const w = workouts.find(item => item.id === activeWorkoutId);
-            if (w) {
-                w.remaining = 0;
-                w.status = 'completed';
-            }
-            playBeep(900, 'sine', 0.2);
-            updateMasterDisplay();
-
-            if (activeWorkoutId < 20) {
-                selectWorkout(activeWorkoutId + 1);
-            } else {
-                backToDashboard();
-            }
-        }
-
-        function resetAllWorkouts() {
-            pauseTimer();
-            workouts.forEach(w => {
-                w.remaining = w.duration;
-                w.status = 'pending';
-            });
-            playBeep(250, 'sawtooth', 0.2);
-            renderDashboard();
-            if (activeWorkoutId) {
-                updateFocusViewUI();
-            }
-        }
-
-        // Global interval to tick overall time if desired or update dashboard tickers
-        setInterval(() => {
-            if (!isRunning && activeWorkoutId === null) {
-                updateMasterDisplay();
-            }
-        }, 1000);
-
-        // Initial render on load
-        window.onload = function() {
-            renderDashboard();
-        };
+        const app = new WorkoutApp();
     </script>
 </body>
 </html>
