@@ -322,7 +322,8 @@
 <body>
 
     <div class="container">
-        <header>
+        <!-- App Header (Hidden during active workout) -->
+        <header id="app-header">
             <h1>Pro Workout Sessions</h1>
             <p>Select a structured routine to preview and launch</p>
         </header>
@@ -800,6 +801,8 @@
                 this.totalWorkoutDuration = workout.steps.reduce((acc, step) => acc + step.duration, 0);
                 this.totalTimeLeft = this.totalWorkoutDuration;
 
+                // Hide header and list, show active session
+                document.getElementById('app-header').style.display = 'none';
                 document.getElementById('workout-list').style.display = 'none';
                 document.getElementById('active-session').style.display = 'block';
 
@@ -913,6 +916,7 @@
             exitWorkout() {
                 if (this.timerInterval) clearInterval(this.timerInterval);
                 document.getElementById('active-session').style.display = 'none';
+                document.getElementById('app-header').style.display = 'block';
                 document.getElementById('workout-list').style.display = 'grid';
             }
 
