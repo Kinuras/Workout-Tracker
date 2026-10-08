@@ -256,12 +256,19 @@
             color: var(--text-muted);
         }
 
-        /* Controls */
+        /* Controls Layout */
         .controls {
             display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
+            flex-direction: column;
             gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .control-row {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            width: 100%;
         }
 
         .btn {
@@ -273,6 +280,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: background-color 0.2s, transform 0.1s;
+            flex: 1;
         }
 
         .btn:hover {
@@ -344,12 +352,22 @@
                 <div class="overall-progress-bar" id="overall-progress"></div>
             </div>
 
-            <div class="controls" style="margin-top: 1.5rem;">
-                <button class="btn btn-secondary" onclick="app.prevStep()">⏮ Prev</button>
-                <button class="btn btn-secondary" id="pause-btn" onclick="app.togglePause()">Pause</button>
-                <button class="btn btn-secondary" onclick="app.restartStep()">↺ Restart Step</button>
-                <button class="btn btn-secondary" onclick="app.nextStep()">Next ⏭</button>
-                <button class="btn btn-danger" onclick="app.exitWorkout()">Exit</button>
+            <!-- Structured Controls -->
+            <div class="controls">
+                <!-- Row 1: Back & Next -->
+                <div class="control-row">
+                    <button class="btn btn-secondary" onclick="app.prevStep()">⏮ Prev</button>
+                    <button class="btn btn-secondary" onclick="app.nextStep()">Next ⏭</button>
+                </div>
+                <!-- Row 2: Start/Resume Button -->
+                <div class="control-row">
+                    <button class="btn" id="pause-btn" onclick="app.togglePause()">Start/Resume</button>
+                </div>
+                <!-- Row 3: Utility / Exit Actions -->
+                <div class="control-row">
+                    <button class="btn btn-secondary" onclick="app.restartStep()">↺ Restart Step</button>
+                    <button class="btn btn-danger" onclick="app.exitWorkout()">Exit</button>
+                </div>
             </div>
         </div>
     </div>
@@ -362,7 +380,7 @@
                     <h2 id="modal-title" style="margin-bottom: 0.25rem;">Workout Title</h2>
                     <p id="modal-desc" style="color: var(--text-muted); font-size: 0.9rem;"></p>
                 </div>
-                <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem;" onclick="app.closeModal()">✕</button>
+                <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; flex: none;" onclick="app.closeModal()">✕</button>
             </div>
             <div class="modal-body">
                 <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
@@ -776,8 +794,8 @@
 
                 this.currentWorkout = workout;
                 this.currentStepIndex = 0;
-                this.isPaused = true; // Starts paused as requested
-                document.getElementById('pause-btn').innerText = "Resume";
+                this.isPaused = true; 
+                document.getElementById('pause-btn').innerText = "Start/Resume";
 
                 this.totalWorkoutDuration = workout.steps.reduce((acc, step) => acc + step.duration, 0);
                 this.totalTimeLeft = this.totalWorkoutDuration;
@@ -862,14 +880,13 @@
 
             togglePause() {
                 this.isPaused = !this.isPaused;
-                document.getElementById('pause-btn').innerText = this.isPaused ? "Resume" : "Pause";
+                document.getElementById('pause-btn').innerText = this.isPaused ? "Start/Resume" : "Pause";
             }
 
             nextStep() {
                 if (this.currentStepIndex + 1 < this.currentWorkout.steps.length) {
-                    // Rebalance total time before skipping
                     const currentStep = this.currentWorkout.steps[this.currentStepIndex];
-                    this.totalTimeLeft -= this.timeLeftInStep; // subtract remaining of current
+                    this.totalTimeLeft -= this.timeLeftInStep;
                     this.currentStepIndex++;
                     this.loadStep(this.currentStepIndex);
                 } else {
@@ -879,7 +896,6 @@
 
             prevStep() {
                 if (this.currentStepIndex > 0) {
-                    // Rebalance total time before moving back
                     const currentStep = this.currentWorkout.steps[this.currentStepIndex];
                     this.totalTimeLeft += (currentStep.duration - this.timeLeftInStep);
                     this.currentStepIndex--;
