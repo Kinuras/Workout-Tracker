@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GCN-Style Structured Workout Tracker</title>
+    <title>Pro Workout Timer & Session Player</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -11,18 +11,8 @@
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --accent: #3b82f6;
-            
-            /* Intensity Colors 1-10 */
-            --lvl-1: #22c55e;
-            --lvl-2: #4ade80;
-            --lvl-3: #84cc16;
-            --lvl-4: #eab308;
-            --lvl-5: #facc15;
-            --lvl-6: #f97316;
-            --lvl-7: #ea580c;
-            --lvl-8: #dc2626;
-            --lvl-9: #ef4444;
-            --lvl-10: #b91c1c;
+            --accent-hover: #2563eb;
+            --border: #334155;
         }
 
         * {
@@ -36,512 +26,564 @@
             background-color: var(--bg-color);
             color: var(--text-main);
             min-height: 100vh;
-            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 24px;
-            max-width: 600px;
-        }
-
-        header h1 {
-            font-size: 1.75rem;
-            margin-bottom: 6px;
-            color: #fff;
-            letter-spacing: 0.5px;
-        }
-
-        header p {
-            color: var(--text-muted);
-            font-size: 0.95rem;
+            padding: 2rem 1rem;
         }
 
         .container {
             width: 100%;
-            max-width: 700px;
+            max-width: 800px;
         }
 
-        /* Workout Selection List */
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #60a5fa, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            color: var(--text-muted);
+        }
+
+        /* Workout List Grid */
         #workout-list {
             display: grid;
-            gap: 12px;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        @media (min-width: 640px) {
+            #workout-list {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         .workout-card {
             background-color: var(--card-bg);
-            border: 1px solid #334155;
+            border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 18px 20px;
+            padding: 1.25rem;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
             display: flex;
+            flex-direction: column;
             justify-content: space-between;
-            align-items: center;
         }
 
         .workout-card:hover {
-            border-color: var(--accent);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+            border-color: var(--accent);
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.1);
         }
 
         .workout-info h3 {
             font-size: 1.1rem;
-            margin-bottom: 4px;
-            color: #fff;
+            margin-bottom: 0.4rem;
         }
 
         .workout-info p {
             font-size: 0.85rem;
             color: var(--text-muted);
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .workout-meta {
-            text-align: right;
             display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 6px;
+            gap: 0.5rem;
         }
 
         .badge {
-            background: #334155;
-            padding: 4px 10px;
-            border-radius: 20px;
             font-size: 0.75rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 20px;
             font-weight: 600;
         }
 
-        /* Active Session Screen */
-        #active-session {
+        /* Modal Preview Screen */
+        #preview-modal {
             display: none;
-            background-color: var(--card-bg);
-            border: 2px solid #334155;
-            border-radius: 16px;
-            padding: 24px;
-            text-align: center;
-            position: relative;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            transition: border-color 0.4s ease;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
         }
 
-        .session-header {
+        .modal-content {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            background: rgba(15, 23, 42, 0.3);
+        }
+
+        /* Step Preview List */
+        .step-preview-list {
+            list-style: none;
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .step-preview-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #334155;
-            padding-bottom: 12px;
-        }
-
-        .back-btn {
-            background: #334155;
-            border: none;
-            color: #fff;
-            padding: 6px 14px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
-
-        .back-btn:hover {
-            background: #475569;
-        }
-
-        .overall-timer-display {
+            background: rgba(15, 23, 42, 0.4);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent);
             font-size: 0.9rem;
-            color: var(--text-muted);
-            font-weight: 500;
         }
 
-        /* Intensity Color Panel */
+        /* Active Workout Session Screen */
+        #active-session {
+            display: none;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
         .intensity-banner {
+            padding: 2rem;
             border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 20px;
-            color: #fff;
-            transition: background-color 0.4s ease, transform 0.2s ease;
+            margin-bottom: 1.5rem;
+            transition: background-color 0.4s ease;
         }
 
-        .current-step-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        .intensity-banner h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
-        .intensity-level-indicator {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 16px;
-            opacity: 0.9;
+        .intensity-banner p {
+            font-size: 1.1rem;
+            font-weight: 500;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
 
-        .section-timer {
-            font-size: 4rem;
+        .timer-display {
+            font-size: 5rem;
             font-weight: 800;
             font-variant-numeric: tabular-nums;
-            line-height: 1;
-            margin-bottom: 8px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            margin: 1rem 0;
+            letter-spacing: -2px;
         }
 
-        .next-preview {
-            font-size: 0.85rem;
-            opacity: 0.8;
-            margin-top: 12px;
-        }
-
-        /* Progress Bar Across Whole Workout */
-        .progress-track {
-            background: #0f172a;
+        .overall-progress-container {
+            width: 100%;
             height: 8px;
+            background: var(--border);
             border-radius: 4px;
             overflow: hidden;
-            margin-bottom: 24px;
+            margin: 1.5rem 0 0.5rem 0;
         }
 
-        .progress-fill {
-            background: var(--accent);
+        .overall-progress-bar {
             height: 100%;
+            background: var(--accent);
             width: 0%;
             transition: width 0.3s linear;
+        }
+
+        .session-meta-row {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .next-preview-box {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--border);
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
         }
 
         /* Controls */
         .controls {
             display: flex;
             justify-content: center;
-            gap: 12px;
+            flex-wrap: wrap;
+            gap: 0.75rem;
         }
 
-        .ctrl-btn {
-            background: #334155;
-            color: #fff;
+        .btn {
+            background-color: var(--accent);
+            color: white;
             border: none;
-            padding: 10px 24px;
+            padding: 0.75rem 1.5rem;
             border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
-            font-size: 0.95rem;
-            transition: background 0.2s;
+            transition: background-color 0.2s, transform 0.1s;
         }
 
-        .ctrl-btn:hover {
-            background: #475569;
+        .btn:hover {
+            background-color: var(--accent-hover);
         }
 
-        .ctrl-btn.primary {
-            background: var(--accent);
+        .btn:active {
+            transform: scale(0.98);
         }
 
-        .ctrl-btn.primary:hover {
-            background: #2563eb;
+        .btn-secondary {
+            background-color: #334155;
+            color: var(--text-main);
         }
 
-        /* Pulse animation for high intensity */
-        @keyframes pulse-red {
+        .btn-secondary:hover {
+            background-color: #475569;
+        }
+
+        .btn-danger {
+            background-color: #ef4444;
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+
+        @keyframes pulseAlert {
             0% { transform: scale(1); }
-            50% { transform: scale(1.01); box-shadow: 0 0 25px rgba(239, 68, 68, 0.4); }
-            100% { transform: scale(1.01); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
         }
 
         .pulsing {
-            animation: pulse-red 1.5s infinite;
+            animation: pulseAlert 1s infinite;
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>Structured Session Player</h1>
-        <p>Select a 30 or 40-minute GCN or HIIT session. Intervals flow automatically with audio cues and color indicators (1–10 intensity).</p>
-    </header>
-
     <div class="container">
-        <!-- Workout Selection Menu -->
-        <div id="workout-list">
-            <!-- Dynamically populated -->
-        </div>
+        <header>
+            <h1>Pro Workout Sessions</h1>
+            <p>Select a structured routine to preview and launch</p>
+        </header>
 
-        <!-- Active Player Screen -->
+        <!-- Main Workout List -->
+        <div id="workout-list"></div>
+
+        <!-- Active Workout Session Player -->
         <div id="active-session">
-            <div class="session-header">
-                <button class="back-btn" onclick="app.exitWorkout()">← Choose Another</button>
-                <div class="overall-timer-display" id="overall-timer-text">Total Remaining: 30:00</div>
+            <div id="intensity-banner" class="intensity-banner">
+                <h2 id="step-name">Warm Up</h2>
+                <p id="step-intensity-label">Intensity Level: 2 / 10</p>
             </div>
 
-            <!-- Overall Progress Bar -->
-            <div class="progress-track">
-                <div class="progress-fill" id="overall-progress"></div>
+            <div class="timer-display" id="section-timer">05:00</div>
+
+            <div class="next-preview-box" id="next-preview-text">
+                Up Next: Loading...
             </div>
 
-            <!-- Color Coded Step Banner -->
-            <div class="intensity-banner" id="intensity-banner">
-                <div class="current-step-title" id="step-name">Warm Up</div>
-                <div class="intensity-level-indicator" id="step-intensity-label">Intensity Level: 2 / 10</div>
-                <div class="section-timer" id="section-timer">00:30</div>
-                <div class="next-preview" id="next-preview-text">Up Next: Zone Increase</div>
+            <div class="session-meta-row">
+                <span id="overall-timer-text">Total Remaining: 30:00</span>
+                <span id="current-phase-indicator">Phase 1 of 6</span>
             </div>
 
-            <!-- Playback Controls -->
-            <div class="controls">
-                <button class="ctrl-btn" onclick="app.togglePause()" id="pause-btn">Pause</button>
-                <button class="ctrl-btn" onclick="app.restartStep()">Restart Step</button>
+            <div class="overall-progress-container">
+                <div class="overall-progress-bar" id="overall-progress"></div>
+            </div>
+
+            <div class="controls" style="margin-top: 1.5rem;">
+                <button class="btn btn-secondary" onclick="app.prevStep()">⏮ Prev</button>
+                <button class="btn btn-secondary" id="pause-btn" onclick="app.togglePause()">Pause</button>
+                <button class="btn btn-secondary" onclick="app.restartStep()">↺ Restart Step</button>
+                <button class="btn btn-secondary" onclick="app.nextStep()">Next ⏭</button>
+                <button class="btn btn-danger" onclick="app.exitWorkout()">Exit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div id="preview-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h2 id="modal-title" style="margin-bottom: 0.25rem;">Workout Title</h2>
+                    <p id="modal-desc" style="color: var(--text-muted); font-size: 0.9rem;"></p>
+                </div>
+                <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem;" onclick="app.closeModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                    <span class="badge" id="modal-badge-duration" style="background: #3b82f6; color: white;">0 Mins</span>
+                    <span class="badge" id="modal-badge-steps" style="background: #334155; color: #cbd5e1;">0 Steps</span>
+                </div>
+                <h4 style="font-size: 0.95rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Session Structure Breakdown</h4>
+                <ul class="step-preview-list" id="modal-steps-list">
+                    <!-- Populated dynamically -->
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="app.closeModal()">Cancel</button>
+                <button class="btn" onclick="app.confirmStartWorkout()">▶ Start Workout (Paused)</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Color Palette Map for Levels 1 to 10
         const levelColors = {
-            1: '#22c55e', // Green
-            2: '#4ade80', 
-            3: '#84cc16', // Lime
-            4: '#eab308', 
-            5: '#facc15', // Yellow
+            1: '#10b981', // Easy Green
+            2: '#3b82f6', // Light Blue
+            3: '#06b6d4', // Cyan
+            4: '#8b5cf6', // Purple
+            5: '#f59e0b', // Amber
             6: '#f97316', // Orange
-            7: '#ea580c', 
-            8: '#dc2626', // Red-Orange
-            9: '#ef4444', // Red
-            10: '#b91c1c'  // Deep Max Red
+            7: '#ea580c', // Deep Orange
+            8: '#ef4444', // Red
+            9: '#dc2626', // Crimson
+            10: '#991b1b' // Max Dark Red
         };
 
-        // 20 Structured Workouts (Mix of 30 min and 40 min sessions)
         const workouts = [
             {
-                id: 1, name: "GCN Classic Pyramid Builder", duration: 30, type: "30-min Cycling",
-                description: "Gradual ramp from green warm-up up to 10/10 red peak, then stepped descent.",
-                steps: [
-                    { name: "Easy Spin Warm-up", level: 2, duration: 180 },
-                    { name: "Building Pace", level: 4, duration: 180 },
-                    { name: "Tempo Effort", level: 6, duration: 180 },
-                    { name: "Hard Threshold", level: 8, duration: 180 },
-                    { name: "Max Sprint Peak", level: 10, duration: 120 },
-                    { name: "Recovery Spin", level: 3, duration: 180 },
-                    { name: "Steady Chase", level: 6, duration: 240 },
-                    { name: "Final Push", level: 9, duration: 120 },
-                    { name: "Cool Down Spin", level: 1, duration: 300 }
-                ]
-            },
-            {
-                id: 2, name: "HIIT Micro-Burst Burner", duration: 30, type: "30-min HIIT",
-                description: "Fast-alternating intervals shifting between active recovery and high gear surges.",
+                id: 1, name: "Quick Cadence Builder 20", duration: 20, type: "20-min Cycling",
+                description: "A short, sharp session focusing on quick cadence climbs and recovery floats.",
                 steps: [
                     { name: "Warm Up", level: 2, duration: 300 },
-                    { name: "Surge 1", level: 8, duration: 60 },
-                    { name: "Recovery", level: 2, duration: 120 },
-                    { name: "Surge 2", level: 9, duration: 60 },
-                    { name: "Recovery", level: 2, duration: 120 },
-                    { name: "Surge 3", level: 10, duration: 60 },
-                    { name: "Recovery", level: 2, duration: 120 },
-                    { name: "Surge 4", level: 9, duration: 60 },
-                    { name: "Recovery", level: 2, duration: 120 },
-                    { name: "Surge 5", level: 10, duration: 60 },
-                    { name: "Midpoint Cruise", level: 4, duration: 300 },
-                    { name: "Surge 6", level: 8, duration: 60 },
-                    { name: "Recovery", level: 2, duration: 90 },
-                    { name: "Surge 7", level: 9, duration: 60 },
-                    { name: "Recovery", level: 2, duration: 90 },
-                    { name: "All Out Finale", level: 10, duration: 60 },
-                    { name: "Cool Down", level: 1, duration: 270 }
+                    { name: "Cadence Push 1", level: 5, duration: 180 },
+                    { name: "Active Recovery", level: 2, duration: 120 },
+                    { name: "Cadence Push 2", level: 7, duration: 180 },
+                    { name: "Active Recovery", level: 2, duration: 120 },
+                    { name: "Final Surge", level: 9, duration: 120 },
+                    { name: "Cool Down", level: 1, duration: 380 }
                 ]
             },
             {
-                id: 3, name: "Threshold Sweet Spot Session", duration: 30, type: "30-min Cycling",
-                description: "Sustained orange and yellow intervals to build aerobic engine capacity.",
+                id: 2, name: "Power Intervals 30", duration: 30, type: "30-min HIIT",
+                description: "Classic high-intensity interval training designed to push your aerobic ceiling.",
                 steps: [
-                    { name: "Spin Warm Up", level: 2, duration: 300 },
-                    { name: "Sweet Spot Block 1", level: 6, duration: 300 },
-                    { name: "Active Rest", level: 3, duration: 120 },
-                    { name: "Sweet Spot Block 2", level: 7, duration: 300 },
-                    { name: "Active Rest", level: 3, duration: 120 },
-                    { name: "Threshold Push", level: 8, duration: 180 },
-                    { name: "Spin Recovery", level: 3, duration: 120 },
+                    { name: "Warm Up", level: 2, duration: 300 },
+                    { name: "Interval 1", level: 8, duration: 120 },
+                    { name: "Recovery", level: 2, duration: 180 },
+                    { name: "Interval 2", level: 9, duration: 120 },
+                    { name: "Recovery", level: 2, duration: 180 },
+                    { name: "Interval 3", level: 9, duration: 120 },
+                    { name: "Recovery", level: 2, duration: 180 },
+                    { name: "Interval 4", level: 10, duration: 60 },
+                    { name: "Cool Down", level: 1, duration: 440 }
+                ]
+            },
+            {
+                id: 3, name: "Endurance Base Builder 45", duration: 45, type: "45-min Endurance",
+                description: "Long continuous zone-2 effort with periodic tempo spikes to build stamina.",
+                steps: [
+                    { name: "Easy Spin", level: 2, duration: 600 },
+                    { name: "Steady State", level: 4, duration: 900 },
+                    { name: "Tempo Spike", level: 6, duration: 300 },
+                    { name: "Steady State", level: 4, duration: 900 },
+                    { name: "Tempo Spike", level: 6, duration: 300 },
+                    { name: "Cool Down", level: 1, duration: 500 }
+                ]
+            },
+            {
+                id: 4, name: "Threshold Builder 30", duration: 30, type: "30-min Threshold",
+                description: "Sustained efforts right at your lactate threshold level.",
+                steps: [
+                    { name: "Warm Up", level: 2, duration: 300 },
+                    { name: "Build Phase", level: 4, duration: 180 },
+                    { name: "Threshold Block 1", level: 7, duration: 480 },
+                    { name: "Recovery", level: 2, duration: 180 },
+                    { name: "Threshold Block 2", level: 8, duration: 480 },
+                    { name: "Cool Down", level: 1, duration: 380 }
+                ]
+            },
+            {
+                id: 5, name: "Hill Climber 35", duration: 35, type: "35-min Cycling",
+                description: "Simulate grinding steep mountain inclines with heavy resistance.",
+                steps: [
+                    { name: "Warm Up", level: 2, duration: 300 },
+                    { name: "Low Climb", level: 5, duration: 300 },
+                    { name: "Steep Climb", level: 8, duration: 450 },
+                    { name: "Descent Float", level: 2, duration: 180 },
+                    { name: "Peak Climb", level: 10, duration: 300 },
+                    { name: "Cool Down", level: 1, duration: 570 }
+                ]
+            },
+            {
+                id: 6, name: "Tabata Blast 20", duration: 20, type: "20-min HIIT",
+                description: "Short, explosive 20/10 protocol intervals to maximize caloric burn.",
+                steps: [
+                    { name: "Warm Up", level: 2, duration: 300 },
+                    { name: "Tabata Sprint", level: 10, duration: 20 },
+                    { name: "Tabata Rest", level: 1, duration: 10 },
+                    { name: "Tabata Sprint", level: 10, duration: 20 },
+                    { name: "Tabata Rest", level: 1, duration: 10 },
+                    { name: "Tabata Sprint", level: 10, duration: 20 },
+                    { name: "Tabata Rest", level: 1, duration: 10 },
+                    { name: "Tabata Sprint", level: 10, duration: 20 },
+                    { name: "Tabata Rest", level: 1, duration: 10 },
+                    { name: "Flush", level: 3, duration: 300 },
+                    { name: "Cool Down", level: 1, duration: 390 }
+                ]
+            },
+            {
+                id: 7, name: "Recovery Spin 25", duration: 25, type: "25-min Recovery",
+                description: "Easy active flush to help flush out sore muscles and promote recovery.",
+                steps: [
+                    { name: "Easy Spin", level: 1, duration: 300 },
+                    { name: "Light Cadence", level: 2, duration: 600 },
+                    { name: "Easy Spin", level: 1, duration: 600 },
+                    { name: "Stretch Spin", level: 1, duration: 100 }
+                ]
+            },
+            {
+                id: 8, name: "Speed & Power 30", duration: 30, type: "30-min HIIT",
+                description: "Mix high torque low cadence with lightning fast high cadence sprints.",
+                steps: [
+                    { name: "Warm Up", level: 2, duration: 300 },
+                    { name: "Torque Effort", level: 9, duration: 120 },
+                    { name: "Recovery", level: 2, duration: 180 },
+                    { name: "Speed Sprint", level: 10, duration: 60 },
+                    { name: "Recovery", level: 2, duration: 180 },
+                    { name: "Torque Effort", level: 9, duration: 120 },
+                    { name: "Recovery", level: 2, duration: 180 },
+                    { name: "Speed Sprint", level: 10, duration: 60 },
+                    { name: "Cool Down", level: 1, duration: 600 }
+                ]
+            },
+            {
+                id: 9, name: "Tempo Cruise 40", duration: 40, type: "40-min Endurance",
+                description: "Sustained comfortable-hard pace designed to enhance aerobic efficiency.",
+                steps: [
+                    { name: "Warm Up", level: 2, duration: 600 },
+                    { name: "Tempo Block 1", level: 5, duration: 900 },
+                    { name: "Recovery Float", level: 3, duration: 300 },
+                    { name: "Tempo Block 2", level: 6, duration: 900 },
+                    { name: "Cool Down", level: 1, duration: 600 }
+                ]
+            },
+            {
+                id: 10, name: "Pyramid Peak 30", duration: 30, type: "30-min HIIT",
+                description: "Escalate intensity step by step up to maximum, then step back down.",
+                steps: [
+                    { name: "Warm Up", level: 2, duration: 300 },
+                    { name: "Step Up 1", level: 4, duration: 180 },
+                    { name: "Step Up 2", level: 6, duration: 180 },
+                    { name: "Peak Effort", level: 9, duration: 180 },
+                    { name: "Step Down 1", level: 6, duration: 180 },
+                    { name: "Step Down 2", level: 4, duration: 180 },
+                    { name: "Cool Down", level: 1, duration: 300 }
+                ]
+            },
+            {
+                id: 11, name: "Over-Under Threshold 35", duration: 35, type: "35-min Threshold",
+                description: "Alternating slightly above and slightly below threshold power zones.",
+                steps: [
+                    { name: "Warm Up", level: 2, duration: 300 },
+                    { name: "Under Zone", level: 6, duration: 300 },
+                    { name: "Over Zone", level: 8, duration: 180 },
+                    { name: "Under Zone", level: 6, duration: 300 },
+                    { name: "Over Zone", level: 8, duration: 180 },
+                    { name: "Recovery", level: 2, duration: 180 },
+                    { name: "Cool Down", level: 1, duration: 560 }
+                ]
+            },
+            {
+                id: 12, name: "Micro-Burst Accelerator 25", duration: 25, type: "25-min HIIT",
+                description: "Short 15-second explosive bursts followed by quick recoveries.",
+                steps: [
+                    { name: "Warm Up", level: 2, duration: 300 },
+                    { name: "Burst 1", level: 10, duration: 15 },
+                    { name: "Float", level: 2, duration: 45 },
+                    { name: "Burst 2", level: 10, duration: 15 },
+                    { name: "Float", level: 2, duration: 45 },
+                    { name: "Burst 3", level: 10, duration: 15 },
+                    { name: "Float", level: 2, duration: 45 },
+                    { name: "Burst 4", level: 10, duration: 15 },
+                    { name: "Float", level: 2, duration: 45 },
+                    { name: "Steady Cruise", level: 4, duration: 400 },
+                    { name: "Cool Down", level: 1, duration: 385 }
+                ]
+            },
+            {
+                id: 13, name: "The Long Grind 50", duration: 50, type: "50-min Endurance",
+                description: "Our longest standard session for building deep endurance reserves.",
+                steps: [
+                    { name: "Easy Spin", level: 2, duration: 600 },
+                    { name: "Steady Climb", level: 4, duration: 1200 },
+                    { name: "Tempo Block", level: 6, duration: 600 },
+                    { name: "Steady Cruise", level: 4, duration: 600 },
+                    { name: "Cool Down", level: 1, duration: 1000 }
+                ]
+            },
+            {
+                id: 14, name: "V02 Max Builder 30", duration: 30, type: "30-min HIIT",
+                description: "Deep red-line efforts designed to expand your maximum oxygen intake capacity.",
+                steps: [
+                    { name: "Warm Up", level: 2, duration: 360 },
+                    { name: "VO2 Effort 1", level: 9, duration: 180 },
+                    { name: "Full Rest", level: 1, duration: 180 },
+                    { name: "VO2 Effort 2", level: 10, duration: 180 },
+                    { name: "Full Rest", level: 1, duration: 180 },
+                    { name: "VO2 Effort 3", level: 10, duration: 180 },
+                    { name: "Full Rest", level: 1, duration: 180 },
                     { name: "Cool Down", level: 1, duration: 360 }
                 ]
             },
             {
-                id: 4, name: "Rolling Hills Simulation", duration: 40, type: "40-min Endurance",
-                description: "Simulated outdoor terrain with long climbs and valley recoveries.",
-                steps: [
-                    { name: "Flat Road Warm Up", level: 2, duration: 300 },
-                    { name: "Gentle Foothills", level: 4, duration: 300 },
-                    { name: "Climbing Grade 1", level: 6, duration: 300 },
-                    { name: "Steep Climb Grade 2", level: 8, duration: 240 },
-                    { name: "Summit Peak", level: 9, duration: 120 },
-                    { name: "Fast Descent (Recovery)", level: 2, duration: 300 },
-                    { name: "Second Climb Attack", level: 7, duration: 300 },
-                    { name: "Steep Peak Push", level: 10, duration: 180 },
-                    { name: "Valley Recovery", level: 3, duration: 300 },
-                    { name: "Final Roll", level: 5, duration: 300 },
-                    { name: "Easy Spin Cool Down", level: 1, duration: 360 }
-                ]
-            },
-            {
-                id: 5, name: "Tabata Extreme Engine", duration: 30, type: "30-min HIIT",
-                description: "High-intensity bursts with strict short recoveries.",
-                steps: [
-                    { name: "Dynamic Warm Up", level: 2, duration: 360 },
-                    { name: "Tabata Block (20s On / 10s Off x 8)", level: 10, duration: 160 },
-                    { name: "Mid-Session Recovery", level: 2, duration: 300 },
-                    { name: "Tabata Block 2", level: 10, duration: 160 },
-                    { name: "Flush Out", level: 3, duration: 300 },
-                    { name: "Power Surge", level: 9, duration: 120 },
-                    { name: "Cool Down", level: 1, duration: 300 }
-                ]
-            },
-            {
-                id: 6, name: "Endurance Base Builder", duration: 40, type: "40-min Endurance",
-                description: "Consistent green and yellow zone focus to build aerobic stamina.",
-                steps: [
-                    { name: "Easy Spin", level: 2, duration: 600 },
-                    { name: "Steady Aerobic Pace", level: 4, duration: 900 },
-                    { name: "Tempo Block", level: 5, duration: 600 },
-                    { name: "Aerobic Cruise", level: 3, duration: 600 },
-                    { name: "Cool Down", level: 1, duration: 300 }
-                ]
-            },
-            {
-                id: 7, name: "V02 Max Power Builder", duration: 30, type: "30-min Cycling",
-                description: "Hard effort repeats designed to raise ceiling performance limits.",
-                steps: [
-                    { name: "Warm Up", level: 2, duration: 300 },
-                    { name: "VO2 Interval 1", level: 9, duration: 180 },
-                    { name: "Recovery", level: 2, duration: 180 },
-                    { name: "VO2 Interval 2", level: 9, duration: 180 },
-                    { name: "Recovery", level: 2, duration: 180 },
-                    { name: "VO2 Interval 3", level: 10, duration: 180 },
-                    { name: "Recovery", level: 2, duration: 180 },
-                    { name: "VO2 Interval 4", level: 10, duration: 180 },
-                    { name: "Cool Down", level: 1, duration: 300 }
-                ]
-            },
-            {
-                id: 8, name: "Cadence Quickness Drill", duration: 30, type: "30-min Cycling",
-                description: "Fast leg speeds mixed with heavy resistance blocks.",
-                steps: [
-                    { name: "Warm Up Spin", level: 2, duration: 300 },
-                    { name: "High Cadence Spin", level: 4, duration: 240 },
-                    { name: "Heavy Torque Push", level: 7, duration: 180 },
-                    { name: "Spin Recovery", level: 2, duration: 180 },
-                    { name: "High Cadence Spin 2", level: 5, duration: 240 },
-                    { name: "Heavy Torque Push 2", level: 8, duration: 180 },
-                    { name: "Spin Recovery", level: 2, duration: 180 },
-                    { name: "Max Leg Speed Sprint", level: 9, duration: 120 },
-                    { name: "Cool Down", level: 1, duration: 300 }
-                ]
-            },
-            {
-                id: 9, name: "The Grand Tour Stage Simulation", duration: 40, type: "40-min Endurance",
-                description: "Long flat chase leading into a massive final mountain climb.",
-                steps: [
-                    { name: "Neutral Rollout", level: 2, duration: 600 },
-                    { name: "Breakaway Chase", level: 6, duration: 600 },
-                    { name: "Peloton Lull", level: 3, duration: 300 },
-                    { name: "Base of Mountain", level: 5, duration: 300 },
-                    { name: "Climbing Step Up", level: 7, duration: 300 },
-                    { name: "Category 1 Ascent", level: 9, duration: 300 },
-                    { name: "Summit Attack", level: 10, duration: 180 },
-                    { name: "Cool Down Descent", level: 1, duration: 520 }
-                ]
-            },
-            {
-                id: 10, name: "Fast & Furious 30-Min Blast", duration: 30, type: "30-min HIIT",
-                description: "Punchy, fast-paced intervals with minimal downtime.",
-                steps: [
-                    { name: "Quick Warm Up", level: 2, duration: 180 },
-                    { name: "Ramp Up", level: 5, duration: 180 },
-                    { name: "Interval Burst 1", level: 8, duration: 120 },
-                    { name: "Recovery", level: 3, duration: 60 },
-                    { name: "Interval Burst 2", level: 9, duration: 120 },
-                    { name: "Recovery", level: 3, duration: 60 },
-                    { name: "Interval Burst 3", level: 10, duration: 120 },
-                    { name: "Recovery", level: 3, duration: 60 },
-                    { name: "Interval Burst 4", level: 9, duration: 120 },
-                    { name: "Recovery", level: 3, duration: 60 },
-                    { name: "Interval Burst 5", level: 10, duration: 120 },
-                    { name: "Recovery", level: 3, duration: 60 },
-                    { name: "Sustained Chase", level: 7, duration: 300 },
-                    { name: "Cool Down", level: 1, duration: 300 }
-                ]
-            },
-            {
-                id: 11, name: "Endurance Pyramid 40", duration: 40, type: "40-min Endurance",
-                description: "Wide pyramid scaling from level 1 up to 10 and back down gracefully.",
-                steps: [
-                    { name: "Base Spin", level: 1, duration: 300 },
-                    { name: "Ramp Up Lvl 2", level: 2, duration: 300 },
-                    { name: "Ramp Up Lvl 4", level: 4, duration: 300 },
-                    { name: "Ramp Up Lvl 6", level: 6, duration: 300 },
-                    { name: "Peak Effort Lvl 8", level: 8, duration: 300 },
-                    { name: "Summit Lvl 10", level: 10, duration: 180 },
-                    { name: "Descent Lvl 8", level: 8, duration: 180 },
-                    { name: "Descent Lvl 6", level: 6, duration: 300 },
-                    { name: "Descent Lvl 4", level: 4, duration: 300 },
-                    { name: "Descent Lvl 2", level: 2, duration: 300 },
-                    { name: "Easy Out", level: 1, duration: 340 }
-                ]
-            },
-            {
-                id: 12, name: "Symptom of Speed 30", duration: 30, type: "30-min HIIT",
-                description: "Repeated fast sprints targeting explosive power output.",
-                steps: [
-                    { name: "Warm Up", level: 2, duration: 300 },
-                    { name: "Sprint 1", level: 10, duration: 45 },
-                    { name: "Float", level: 2, duration: 135 },
-                    { name: "Sprint 2", level: 10, duration: 45 },
-                    { name: "Float", level: 2, duration: 135 },
-                    { name: "Sprint 3", level: 10, duration: 45 },
-                    { name: "Float", level: 2, duration: 135 },
-                    { name: "Sprint 4", level: 10, duration: 45 },
-                    { name: "Float", level: 2, duration: 135 },
-                    { name: "Tempo Block", level: 6, duration: 300 },
-                    { name: "Sprint 5", level: 10, duration: 45 },
-                    { name: "Float", level: 2, duration: 135 },
-                    { name: "Sprint 6", level: 10, duration: 45 },
-                    { name: "Float", level: 2, duration: 135 },
-                    { name: "Cool Down", level: 1, duration: 315 }
-                ]
-            },
-            {
-                id: 13, name: "Threshold Builder 40", duration: 40, type: "40-min Endurance",
-                description: "Long sustained efforts right below threshold to expand FTP.",
-                steps: [
-                    { name: "Warm Up", level: 2, duration: 600 },
-                    { name: "Block 1 (@ Level 6)", level: 6, duration: 600 },
-                    { name: "Recovery Spin", level: 3, duration: 300 },
-                    { name: "Block 2 (@ Level 7)", level: 7, duration: 600 },
-                    { name: "Recovery Spin", level: 3, duration: 300 },
-                    { name: "Final Power Push", level: 8, duration: 300 },
-                    { name: "Cool Down", level: 1, duration: 400 }
-                ]
-            },
-            {
-                id: 14, name: "Mixed Terrain Burner 30", duration: 30, type: "30-min Cycling",
-                description: "Constant variation in resistance and pacing.",
-                steps: [
-                    { name: "Warm Up", level: 2, duration: 240 },
-                    { name: "Roller 1", level: 5, duration: 180 },
-                    { name: "Recovery", level: 2, duration: 120 },
-                    { name: "Roller 2", level: 7, duration: 180 },
-                    { name: "Recovery", level: 2, duration: 120 },
-                    { name: "Roller 3", level: 9, duration: 180 },
-                    { name: "Recovery", level: 3, duration: 120 },
-                    { name: "Roller 4", level: 6, duration: 240 },
-                    { name: "Surge", level: 8, duration: 180 },
-                    { name: "Cool Down", level: 1, duration: 300 }
-                ]
-            },
-            {
-                id: 15, name: "Endurance Core Pace 40", duration: 40, type: "40-min Endurance",
-                description: "Solid mid-range pacing with structured tempo changes.",
+                id: 15, name: "Cadence Step-Up 30", duration: 30, type: "30-min Cycling",
+                description: "Progressive cadence ladder scaling leg speed phase by phase.",
                 steps: [
                     { name: "Warm Up", level: 2, duration: 500 },
                     { name: "Pace Step 1", level: 4, duration: 600 },
@@ -638,8 +680,9 @@
                 this.totalTimeLeft = 0;
                 this.totalWorkoutDuration = 0;
                 this.timerInterval = null;
-                this.isPaused = false;
+                this.isPaused = true;
                 this.audioCtx = null;
+                this.pendingWorkout = null;
 
                 this.initList();
             }
@@ -688,22 +731,57 @@
                             <span class="badge" style="background: #334155; color: #cbd5e1;">${w.steps.length} Steps</span>
                         </div>
                     `;
-                    card.onclick = () => this.startWorkout(w);
+                    card.onclick = () => this.openPreview(w);
                     listEl.appendChild(card);
                 });
             }
 
-            startWorkout(workout) {
+            openPreview(workout) {
+                this.pendingWorkout = workout;
+                document.getElementById('modal-title').innerText = workout.name;
+                document.getElementById('modal-desc').innerText = workout.description;
+                document.getElementById('modal-badge-duration').innerText = `${workout.duration} Mins`;
+                document.getElementById('modal-badge-steps').innerText = `${workout.steps.length} Steps`;
+
+                const stepsListEl = document.getElementById('modal-steps-list');
+                stepsListEl.innerHTML = '';
+
+                workout.steps.forEach((step, idx) => {
+                    const item = document.createElement('li');
+                    item.className = 'step-preview-item';
+                    const color = levelColors[step.level] || '#3b82f6';
+                    item.style.borderLeftColor = color;
+                    item.innerHTML = `
+                        <span><strong>${idx + 1}. ${step.name}</strong></span>
+                        <div>
+                            <span class="badge" style="background: ${color}; color: white; margin-right: 0.5rem;">Lvl ${step.level}</span>
+                            <span style="color: var(--text-muted); font-size: 0.85rem;">${this.formatTime(step.duration)}</span>
+                        </div>
+                    `;
+                    stepsListEl.appendChild(item);
+                });
+
+                document.getElementById('preview-modal').style.display = 'flex';
+            }
+
+            closeModal() {
+                document.getElementById('preview-modal').style.display = 'none';
+                this.pendingWorkout = null;
+            }
+
+            confirmStartWorkout() {
+                if (!this.pendingWorkout) return;
+                const workout = this.pendingWorkout;
+                this.closeModal();
+
                 this.currentWorkout = workout;
                 this.currentStepIndex = 0;
-                this.isPaused = false;
-                document.getElementById('pause-btn').innerText = "Pause";
+                this.isPaused = true; // Starts paused as requested
+                document.getElementById('pause-btn').innerText = "Resume";
 
-                // Calculate total duration in seconds
                 this.totalWorkoutDuration = workout.steps.reduce((acc, step) => acc + step.duration, 0);
                 this.totalTimeLeft = this.totalWorkoutDuration;
 
-                // Toggle views
                 document.getElementById('workout-list').style.display = 'none';
                 document.getElementById('active-session').style.display = 'block';
 
@@ -715,11 +793,10 @@
                 const step = this.currentWorkout.steps[index];
                 this.timeLeftInStep = step.duration;
 
-                // Update UI elements
                 document.getElementById('step-name').innerText = step.name;
                 document.getElementById('step-intensity-label').innerText = `Intensity Level: ${step.level} / 10`;
-                
-                // Color banner styling
+                document.getElementById('current-phase-indicator').innerText = `Phase ${index + 1} of ${this.currentWorkout.steps.length}`;
+
                 const banner = document.getElementById('intensity-banner');
                 const colorHex = levelColors[step.level] || '#3b82f6';
                 banner.style.backgroundColor = colorHex;
@@ -730,11 +807,10 @@
                     banner.classList.remove('pulsing');
                 }
 
-                // Next step preview
                 const nextPreviewEl = document.getElementById('next-preview-text');
                 if (index + 1 < this.currentWorkout.steps.length) {
                     const nextStep = this.currentWorkout.steps[index + 1];
-                    nextPreviewEl.innerText = `Up Next: ${nextStep.name} (Lvl ${nextStep.level}) - ${this.formatTime(nextStep.duration)}`;
+                    nextPreviewEl.innerText = `Up Next: ${nextStep.name} (Lvl ${nextStep.level}) — ${this.formatTime(nextStep.duration)}`;
                 } else {
                     nextPreviewEl.innerText = `Final Step of Session!`;
                 }
@@ -749,18 +825,16 @@
                     if (this.isPaused) return;
 
                     if (this.timeLeftInStep > 0) {
-                        // Countdown beeps in last 3 seconds of step
                         if (this.timeLeftInStep <= 4 && this.timeLeftInStep > 1) {
                             this.playBeep(440, 0.1, 'sine');
                         } else if (this.timeLeftInStep === 1) {
-                            this.playBeep(880, 0.2, 'triangle'); // Higher pitch transition cue
+                            this.playBeep(880, 0.2, 'triangle');
                         }
 
                         this.timeLeftInStep--;
                         this.totalTimeLeft--;
                         this.updateDisplay();
                     } else {
-                        // Move to next step or finish
                         this.currentStepIndex++;
                         if (this.currentStepIndex < this.currentWorkout.steps.length) {
                             this.loadStep(this.currentStepIndex);
@@ -772,15 +846,11 @@
             }
 
             updateDisplay() {
-                // Section timer
                 document.getElementById('section-timer').innerText = this.formatTime(this.timeLeftInStep);
-
-                // Overall timer
                 document.getElementById('overall-timer-text').innerText = `Total Remaining: ${this.formatTime(this.totalTimeLeft)}`;
 
-                // Progress bar
                 const elapsed = this.totalWorkoutDuration - this.totalTimeLeft;
-                const percent = (elapsed / this.totalWorkoutDuration) * 100;
+                const percent = Math.min(100, Math.max(0, (elapsed / this.totalWorkoutDuration) * 100));
                 document.getElementById('overall-progress').style.width = `${percent}%`;
             }
 
@@ -795,9 +865,30 @@
                 document.getElementById('pause-btn').innerText = this.isPaused ? "Resume" : "Pause";
             }
 
+            nextStep() {
+                if (this.currentStepIndex + 1 < this.currentWorkout.steps.length) {
+                    // Rebalance total time before skipping
+                    const currentStep = this.currentWorkout.steps[this.currentStepIndex];
+                    this.totalTimeLeft -= this.timeLeftInStep; // subtract remaining of current
+                    this.currentStepIndex++;
+                    this.loadStep(this.currentStepIndex);
+                } else {
+                    this.finishWorkout();
+                }
+            }
+
+            prevStep() {
+                if (this.currentStepIndex > 0) {
+                    // Rebalance total time before moving back
+                    const currentStep = this.currentWorkout.steps[this.currentStepIndex];
+                    this.totalTimeLeft += (currentStep.duration - this.timeLeftInStep);
+                    this.currentStepIndex--;
+                    this.loadStep(this.currentStepIndex);
+                }
+            }
+
             restartStep() {
                 const step = this.currentWorkout.steps[this.currentStepIndex];
-                // Adjust total time left balance
                 this.totalTimeLeft += (step.duration - this.timeLeftInStep);
                 this.timeLeftInStep = step.duration;
                 this.updateDisplay();
