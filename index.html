@@ -1,14 +1,3 @@
-Here is a significantly improved version. I have upgraded the design to a modern "Cyber/Fitness" aesthetic, fixed control layouts for better usability on mobile devices, and added visual cues (like the timer pulsing) that were missing in the original logic.
-
-### Key Improvements:
-1.  **Visual Polish:** Added a deep blur/glass effect to the cards and a glowing pulse to the timer when it is getting close to zero (3 seconds left).
-2.  **UI/UX Layout:** Moved the controls to a **"Sticky Bottom Bar"** for the active session. This prevents them from moving around on mobile screens, making "Next" and "Prev" easy to thumb-reach.
-3.  **Smart Timer Logic:** The timer now highlights red when there is less than 10 seconds left in a step.
-4.  **Cleaner Code:** Used `const` arrays instead of objects for the workout data, which makes the DOM manipulation in `initList()` much faster (better performance).
-
-### Improved Code
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -508,4 +497,3 @@ Here is a significantly improved version. I have upgraded the design to a modern
     </script>
 </body>
 </html>
-```
