@@ -10,9 +10,10 @@
             --card-bg: #1e293b;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --accent: #3b82f6;
-            --accent-hover: #2563eb;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
             --border: #334155;
+            --focus: #93c5fd;
         }
 
         * {
@@ -20,6 +21,20 @@
             margin: 0;
             padding: 0;
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--focus);
+            outline-offset: 2px;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip: rect(0 0 0 0);
+            white-space: nowrap;
         }
 
         body {
@@ -54,6 +69,66 @@
             color: var(--text-muted);
         }
 
+        /* Browse / Filter Bar */
+        .browse-bar {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .browse-row {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .search-input,
+        .sort-select {
+            background: var(--card-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.6rem 0.8rem;
+            font-size: 0.9rem;
+        }
+
+        .search-input {
+            flex: 1 1 200px;
+        }
+
+        .chips {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .chip {
+            background: var(--card-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 0.35rem 0.9rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .chip:hover {
+            border-color: var(--accent);
+        }
+
+        .chip[aria-pressed="true"] {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        .result-count {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
         /* Workout List Grid */
         #workout-list {
             display: grid;
@@ -65,6 +140,13 @@
             #workout-list {
                 grid-template-columns: repeat(2, 1fr);
             }
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: var(--text-muted);
+            padding: 2rem 1rem;
         }
 
         .workout-card {
@@ -79,7 +161,8 @@
             justify-content: space-between;
         }
 
-        .workout-card:hover {
+        .workout-card:hover,
+        .workout-card:focus-visible {
             transform: translateY(-2px);
             border-color: var(--accent);
             box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.1);
@@ -103,6 +186,7 @@
         .workout-meta {
             display: flex;
             gap: 0.5rem;
+            flex-wrap: wrap;
         }
 
         .badge {
@@ -112,8 +196,50 @@
             font-weight: 600;
         }
 
-        /* Modal Preview Screen */
-        #preview-modal {
+        .badge-primary { background: var(--accent); color: #fff; }
+        .badge-muted { background: #334155; color: #cbd5e1; }
+
+        /* Intensity Profile (bar chart of steps) */
+        .profile {
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            height: 64px;
+            border-radius: 6px;
+            overflow: hidden;
+            background: rgba(15, 23, 42, 0.4);
+        }
+
+        .profile.mini {
+            height: 28px;
+            margin-bottom: 1rem;
+        }
+
+        .profile-bar {
+            min-width: 0;
+            box-shadow: 1px 0 0 var(--card-bg);
+            transition: opacity 0.3s;
+        }
+
+        .profile.live .profile-bar { opacity: 0.6; }
+        .profile.live .profile-bar.done { opacity: 0.3; }
+        .profile.live .profile-bar.current { opacity: 1; }
+
+        .profile-playhead {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: 2px;
+            margin-left: -1px;
+            background: #fff;
+            box-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
+            pointer-events: none;
+            transition: left 0.25s linear;
+        }
+
+        /* Modals */
+        .modal-overlay {
             display: none;
             position: fixed;
             top: 0;
@@ -164,6 +290,46 @@
             background: rgba(15, 23, 42, 0.3);
         }
 
+        .modal-content.narrow {
+            max-width: 420px;
+        }
+
+        .modal-title {
+            margin-bottom: 0.25rem;
+        }
+
+        .modal-desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* 44px minimum so it is easy to hit with a thumb */
+        .btn-close {
+            flex: none;
+            min-width: 44px;
+            min-height: 44px;
+            padding: 0.4rem 0.8rem;
+        }
+
+        .modal-badges {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .profile.modal {
+            margin-bottom: 1.25rem;
+        }
+
+        .step-level {
+            margin-right: 0.5rem;
+        }
+
+        .step-time {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
         /* Step Preview List */
         .step-preview-list {
             list-style: none;
@@ -185,7 +351,8 @@
         }
 
         /* Active Workout Session Screen */
-        #active-session {
+        #active-session,
+        #complete-screen {
             display: none;
             background-color: var(--card-bg);
             border: 1px solid var(--border);
@@ -193,6 +360,13 @@
             padding: 2rem;
             text-align: center;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .paused-flag {
+            color: var(--text-muted);
+            font-weight: 600;
+            min-height: 1.5rem;
+            margin-bottom: 1rem;
         }
 
         .intensity-banner {
@@ -205,13 +379,11 @@
         .intensity-banner h2 {
             font-size: 2rem;
             margin-bottom: 0.5rem;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
         .intensity-banner p {
             font-size: 1.1rem;
             font-weight: 500;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
 
         .timer-display {
@@ -220,6 +392,10 @@
             font-variant-numeric: tabular-nums;
             margin: 1rem 0;
             letter-spacing: -2px;
+        }
+
+        #active-session.paused .timer-display {
+            opacity: 0.6;
         }
 
         .overall-progress-container {
@@ -251,9 +427,27 @@
             border: 1px solid var(--border);
             padding: 0.75rem;
             border-radius: 8px;
-            margin-bottom: 1.5rem;
+            margin: 1rem 0 1.5rem 0;
             font-size: 0.9rem;
             color: var(--text-muted);
+        }
+
+        .toggle-row {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .kbd-hint {
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        @media (hover: none) {
+            .kbd-hint { display: none; }
         }
 
         /* Controls Layout */
@@ -277,6 +471,7 @@
             border: none;
             padding: 0.75rem 1.5rem;
             border-radius: 8px;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             transition: background-color 0.2s, transform 0.1s;
@@ -301,11 +496,11 @@
         }
 
         .btn-danger {
-            background-color: #ef4444;
+            background-color: #dc2626;
         }
 
         .btn-danger:hover {
-            background-color: #dc2626;
+            background-color: #b91c1c;
         }
 
         @keyframes pulseAlert {
@@ -317,28 +512,112 @@
         .pulsing {
             animation: pulseAlert 1s infinite;
         }
+
+        .intensity-banner.is-paused {
+            animation: none;
+        }
+
+        /* Completion Screen */
+        #complete-screen h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        #complete-name {
+            color: var(--text-muted);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin: 1.5rem 0;
+        }
+
+        @media (min-width: 640px) {
+            .stats-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        .stat {
+            background: rgba(15, 23, 42, 0.4);
+            border-radius: 10px;
+            padding: 0.9rem 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .section-label {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation: none !important;
+                transition: none !important;
+            }
+            .workout-card:hover,
+            .workout-card:focus-visible {
+                transform: none;
+            }
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- App Header (Hidden during active workout) -->
-        <header id="app-header">
-            <h1>Pro Workout Sessions</h1>
-            <p>Select a structured routine to preview and launch</p>
-        </header>
+        <!-- Browse view: header, search/filter bar and workout list (hidden during a session) -->
+        <div id="browse-view">
+            <header id="app-header">
+                <h1>Pro Workout Sessions</h1>
+                <p>Select a structured routine to preview and launch</p>
+            </header>
 
-        <!-- Main Workout List -->
-        <div id="workout-list"></div>
+            <div class="browse-bar">
+                <div class="browse-row">
+                    <input type="search" id="search-input" class="search-input" placeholder="Search workouts…" aria-label="Search workouts">
+                    <select id="sort-select" class="sort-select" aria-label="Sort workouts">
+                        <option value="default">Sort: Default</option>
+                        <option value="duration-asc">Shortest first</option>
+                        <option value="duration-desc">Longest first</option>
+                        <option value="intensity-desc">Hardest first</option>
+                        <option value="name">Name A–Z</option>
+                    </select>
+                </div>
+                <div class="chips" id="type-chips" role="group" aria-label="Filter by type"></div>
+                <div class="result-count" id="result-count" role="status"></div>
+            </div>
+
+            <div id="workout-list"></div>
+        </div>
 
         <!-- Active Workout Session Player -->
-        <div id="active-session">
+        <div id="active-session" aria-label="Active workout">
+            <div id="paused-flag" class="paused-flag"></div>
+
             <div id="intensity-banner" class="intensity-banner">
                 <h2 id="step-name">Warm Up</h2>
                 <p id="step-intensity-label">Intensity Level: 2 / 10</p>
             </div>
 
-            <div class="timer-display" id="section-timer">05:00</div>
+            <!-- role=timer is implicitly aria-live="off"; step changes are announced via #sr-status instead of every second -->
+            <div class="timer-display" id="section-timer" role="timer" aria-live="off">05:00</div>
+
+            <div class="profile live" id="session-profile" role="img" aria-label="Intensity profile of this session"></div>
 
             <div class="next-preview-box" id="next-preview-text">
                 Up Next: Loading...
@@ -353,49 +632,96 @@
                 <div class="overall-progress-bar" id="overall-progress"></div>
             </div>
 
+            <div class="toggle-row" role="group" aria-label="Cues">
+                <button type="button" class="chip" data-pref="sound" aria-pressed="true">🔊 Sound</button>
+                <button type="button" class="chip" data-pref="voice" aria-pressed="false">🗣 Voice</button>
+                <button type="button" class="chip" data-pref="vibrate" aria-pressed="true">📳 Vibrate</button>
+            </div>
+
             <!-- Structured Controls -->
             <div class="controls">
                 <!-- Row 1: Back & Next -->
                 <div class="control-row">
-                    <button class="btn btn-secondary" onclick="app.prevStep()">⏮ Prev</button>
-                    <button class="btn btn-secondary" onclick="app.nextStep()">Next ⏭</button>
+                    <button class="btn btn-secondary" id="prev-btn" onclick="app.prevStep()">⏮ Prev</button>
+                    <button class="btn btn-secondary" id="next-btn" onclick="app.nextStep()">Next ⏭</button>
                 </div>
                 <!-- Row 2: Start/Resume Button -->
                 <div class="control-row">
-                    <button class="btn" id="pause-btn" onclick="app.togglePause()">Start/Resume</button>
+                    <button class="btn" id="pause-btn" onclick="app.togglePause()">▶ Start</button>
                 </div>
                 <!-- Row 3: Utility / Exit Actions -->
                 <div class="control-row">
                     <button class="btn btn-secondary" onclick="app.restartStep()">↺ Restart Step</button>
-                    <button class="btn btn-danger" onclick="app.exitWorkout()">Exit</button>
+                    <button class="btn btn-danger" id="exit-btn" onclick="app.requestExit()">Exit</button>
+                </div>
+            </div>
+
+            <p class="kbd-hint">Shortcuts: Space pause/resume · ← → previous/next · R restart step</p>
+            <div id="sr-status" class="sr-only" role="status" aria-live="polite"></div>
+        </div>
+
+        <!-- Completion Summary -->
+        <div id="complete-screen">
+            <h2 id="complete-title" tabindex="-1">🎉 Workout Complete!</h2>
+            <p id="complete-name"></p>
+
+            <div class="stats-grid">
+                <div class="stat"><div class="stat-value" id="stat-active">0:00</div><div class="stat-label">Active Time</div></div>
+                <div class="stat"><div class="stat-value" id="stat-planned">0:00</div><div class="stat-label">Planned Time</div></div>
+                <div class="stat"><div class="stat-value" id="stat-avg">0</div><div class="stat-label">Avg Level</div></div>
+                <div class="stat"><div class="stat-value" id="stat-peak">0</div><div class="stat-label">Peak Level</div></div>
+            </div>
+
+            <h4 class="section-label">Intensity Profile</h4>
+            <div class="profile" id="complete-profile" role="img" aria-label="Intensity profile of the completed session"></div>
+
+            <div class="controls">
+                <div class="control-row">
+                    <button class="btn btn-secondary" onclick="app.backToList()">All Workouts</button>
+                    <button class="btn" onclick="app.repeatWorkout()">↻ Do Again</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Preview Modal -->
-    <div id="preview-modal">
+    <div id="preview-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
         <div class="modal-content">
             <div class="modal-header">
                 <div>
-                    <h2 id="modal-title" style="margin-bottom: 0.25rem;">Workout Title</h2>
-                    <p id="modal-desc" style="color: var(--text-muted); font-size: 0.9rem;"></p>
+                    <h2 id="modal-title" class="modal-title">Workout Title</h2>
+                    <p id="modal-desc" class="modal-desc"></p>
                 </div>
-                <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; flex: none;" onclick="app.closeModal()">✕</button>
+                <button class="btn btn-secondary btn-close" aria-label="Close" onclick="app.closeModal()">✕</button>
             </div>
             <div class="modal-body">
-                <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-                    <span class="badge" id="modal-badge-duration" style="background: #3b82f6; color: white;">0 Mins</span>
-                    <span class="badge" id="modal-badge-steps" style="background: #334155; color: #cbd5e1;">0 Steps</span>
+                <div class="modal-badges">
+                    <span class="badge badge-primary" id="modal-badge-duration">0 Mins</span>
+                    <span class="badge badge-muted" id="modal-badge-steps">0 Steps</span>
                 </div>
-                <h4 style="font-size: 0.95rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Session Structure Breakdown</h4>
+                <div class="profile modal" id="modal-profile" role="img" aria-label="Intensity profile"></div>
+                <h4 class="section-label">Session Structure Breakdown</h4>
                 <ul class="step-preview-list" id="modal-steps-list">
                     <!-- Populated dynamically -->
                 </ul>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="app.closeModal()">Cancel</button>
-                <button class="btn" onclick="app.confirmStartWorkout()">▶ Start Workout (Paused)</button>
+                <button class="btn" id="modal-start-btn" onclick="app.confirmStartWorkout()">▶ Start Workout (Paused)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exit Confirmation -->
+    <div id="confirm-modal" class="modal-overlay" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-desc">
+        <div class="modal-content narrow">
+            <div class="modal-body">
+                <h2 id="confirm-title" class="modal-title">End workout?</h2>
+                <p id="confirm-desc" class="modal-desc">Your progress in this session will be lost.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="confirm-keep-btn" onclick="app.cancelExit()">Keep Going</button>
+                <button class="btn btn-danger" id="confirm-ok-btn" onclick="app.confirmExit()">End Workout</button>
             </div>
         </div>
     </div>
@@ -414,520 +740,954 @@
             10: '#991b1b' // Max Dark Red
         };
 
+        // Step builders: step("Warm Up", 2, "5:00") -> { name, level, duration (sec) }
+        const step = (name, level, time) => {
+            const [m, s] = time.split(':').map(Number);
+            return { name, level, duration: m * 60 + s };
+        };
+
+        // n work/rest pairs ("Sprint 1", "Rest", "Sprint 2", ...). The last rest is dropped unless trailingRest is true.
+        const sets = (n, [workName, workLevel, workTime], [restName, restLevel, restTime], trailingRest = false) =>
+            Array.from({ length: n }, (_, i) => [
+                step(`${workName} ${i + 1}`, workLevel, workTime),
+                ...(trailingRest || i < n - 1 ? [step(restName, restLevel, restTime)] : [])
+            ]).flat();
+
+        const overUnders = () => [
+            step("Under", 6, "4:00"), step("Over", 8, "2:00"),
+            step("Under", 6, "4:00"), step("Over", 8, "2:00")
+        ];
+
+        // Every workout's length is the sum of its steps, so the number in the name is exact.
         const workouts = [
+            /* ---------- Zone 2 ---------- */
             {
-                id: 1, name: "Quick Cadence Builder 20", duration: 20, type: "20-min Cycling",
-                description: "A short, sharp session focusing on quick cadence climbs and recovery floats.",
+                id: 1, name: "Zone 2 Easy 20", category: "Zone 2",
+                description: "A short, conversational aerobic spin. Keep it smooth and easy.",
                 steps: [
-                    { name: "Warm Up", level: 2, duration: 300 },
-                    { name: "Cadence Push 1", level: 5, duration: 180 },
-                    { name: "Active Recovery", level: 2, duration: 120 },
-                    { name: "Cadence Push 2", level: 7, duration: 180 },
-                    { name: "Active Recovery", level: 2, duration: 120 },
-                    { name: "Final Surge", level: 9, duration: 120 },
-                    { name: "Cool Down", level: 1, duration: 380 }
+                    step("Warm Up", 2, "4:00"),
+                    step("Zone 2", 3, "12:00"),
+                    step("Cool Down", 1, "4:00")
                 ]
             },
             {
-                id: 2, name: "Power Intervals 30", duration: 30, type: "30-min HIIT",
-                description: "Classic high-intensity interval training designed to push your aerobic ceiling.",
+                id: 2, name: "Zone 2 Steady 30", category: "Zone 2",
+                description: "Steady aerobic base work. Hold a pace where you could still hold a conversation.",
                 steps: [
-                    { name: "Warm Up", level: 2, duration: 300 },
-                    { name: "Interval 1", level: 8, duration: 120 },
-                    { name: "Recovery", level: 2, duration: 180 },
-                    { name: "Interval 2", level: 9, duration: 120 },
-                    { name: "Recovery", level: 2, duration: 180 },
-                    { name: "Interval 3", level: 9, duration: 120 },
-                    { name: "Recovery", level: 2, duration: 180 },
-                    { name: "Interval 4", level: 10, duration: 60 },
-                    { name: "Cool Down", level: 1, duration: 440 }
+                    step("Warm Up", 2, "5:00"),
+                    step("Zone 2", 3, "20:00"),
+                    step("Cool Down", 1, "5:00")
                 ]
             },
             {
-                id: 3, name: "Endurance Base Builder 45", duration: 45, type: "45-min Endurance",
-                description: "Long continuous zone-2 effort with periodic tempo spikes to build stamina.",
+                id: 3, name: "Zone 2 Cadence Mix 30", category: "Zone 2",
+                description: "Zone 2 base with two short spin-ups to keep the legs fresh.",
                 steps: [
-                    { name: "Easy Spin", level: 2, duration: 600 },
-                    { name: "Steady State", level: 4, duration: 900 },
-                    { name: "Tempo Spike", level: 6, duration: 300 },
-                    { name: "Steady State", level: 4, duration: 900 },
-                    { name: "Tempo Spike", level: 6, duration: 300 },
-                    { name: "Cool Down", level: 1, duration: 500 }
+                    step("Warm Up", 2, "5:00"),
+                    step("Zone 2", 3, "8:00"),
+                    step("Spin-Up", 4, "2:00"),
+                    step("Zone 2", 3, "8:00"),
+                    step("Spin-Up", 4, "2:00"),
+                    step("Cool Down", 1, "5:00")
                 ]
             },
             {
-                id: 4, name: "Threshold Builder 30", duration: 30, type: "30-min Threshold",
-                description: "Sustained efforts right at your lactate threshold level.",
+                id: 4, name: "Zone 2 Steady 40", category: "Zone 2",
+                description: "A longer block of steady aerobic work to build your base.",
                 steps: [
-                    { name: "Warm Up", level: 2, duration: 300 },
-                    { name: "Build Phase", level: 4, duration: 180 },
-                    { name: "Threshold Block 1", level: 7, duration: 480 },
-                    { name: "Recovery", level: 2, duration: 180 },
-                    { name: "Threshold Block 2", level: 8, duration: 480 },
-                    { name: "Cool Down", level: 1, duration: 380 }
+                    step("Warm Up", 2, "5:00"),
+                    step("Zone 2", 3, "30:00"),
+                    step("Cool Down", 1, "5:00")
                 ]
             },
             {
-                id: 5, name: "Hill Climber 35", duration: 35, type: "35-min Cycling",
-                description: "Simulate grinding steep mountain inclines with heavy resistance.",
+                id: 5, name: "Zone 2 Cadence Mix 40", category: "Zone 2",
+                description: "Zone 2 with periodic spin-ups to break up the time in the saddle.",
                 steps: [
-                    { name: "Warm Up", level: 2, duration: 300 },
-                    { name: "Low Climb", level: 5, duration: 300 },
-                    { name: "Steep Climb", level: 8, duration: 450 },
-                    { name: "Descent Float", level: 2, duration: 180 },
-                    { name: "Peak Climb", level: 10, duration: 300 },
-                    { name: "Cool Down", level: 1, duration: 570 }
+                    step("Warm Up", 2, "5:00"),
+                    step("Zone 2", 3, "10:00"),
+                    step("Spin-Up", 4, "2:00"),
+                    step("Zone 2", 3, "10:00"),
+                    step("Spin-Up", 4, "2:00"),
+                    step("Zone 2", 3, "6:00"),
+                    step("Cool Down", 1, "5:00")
                 ]
             },
             {
-                id: 6, name: "Tabata Blast 20", duration: 20, type: "20-min HIIT",
-                description: "Short, explosive 20/10 protocol intervals to maximize caloric burn.",
+                id: 6, name: "Zone 2 Progression 40", category: "Zone 2",
+                description: "Start low in Zone 2, climb to the top of it, then settle back down.",
                 steps: [
-                    { name: "Warm Up", level: 2, duration: 300 },
-                    { name: "Tabata Sprint", level: 10, duration: 20 },
-                    { name: "Tabata Rest", level: 1, duration: 10 },
-                    { name: "Tabata Sprint", level: 10, duration: 20 },
-                    { name: "Tabata Rest", level: 1, duration: 10 },
-                    { name: "Tabata Sprint", level: 10, duration: 20 },
-                    { name: "Tabata Rest", level: 1, duration: 10 },
-                    { name: "Tabata Sprint", level: 10, duration: 20 },
-                    { name: "Tabata Rest", level: 1, duration: 10 },
-                    { name: "Flush", level: 3, duration: 300 },
-                    { name: "Cool Down", level: 1, duration: 390 }
+                    step("Warm Up", 2, "5:00"),
+                    step("Zone 2 Low", 3, "12:00"),
+                    step("Zone 2 High", 4, "12:00"),
+                    step("Zone 2 Settle", 3, "6:00"),
+                    step("Cool Down", 1, "5:00")
+                ]
+            },
+
+            /* ---------- Interval ---------- */
+            {
+                id: 7, name: "Tempo Intervals 20", category: "Interval",
+                description: "Two tempo efforts with a short float in between. Quick and sustainable.",
+                steps: [
+                    step("Warm Up", 2, "4:00"),
+                    ...sets(2, ["Tempo", 6, "5:00"], ["Recovery", 2, "2:00"]),
+                    step("Cool Down", 1, "4:00")
                 ]
             },
             {
-                id: 7, name: "Recovery Spin 25", duration: 25, type: "25-min Recovery",
-                description: "Easy active flush to help flush out sore muscles and promote recovery.",
+                id: 8, name: "Tempo Intervals 30", category: "Interval",
+                description: "Three five-minute tempo efforts with easy recoveries.",
                 steps: [
-                    { name: "Easy Spin", level: 1, duration: 300 },
-                    { name: "Light Cadence", level: 2, duration: 600 },
-                    { name: "Easy Spin", level: 1, duration: 600 },
-                    { name: "Stretch Spin", level: 1, duration: 100 }
+                    step("Warm Up", 2, "5:00"),
+                    ...sets(3, ["Tempo", 6, "5:00"], ["Recovery", 2, "2:00"]),
+                    step("Cool Down", 1, "6:00")
                 ]
             },
             {
-                id: 8, name: "Speed & Power 30", duration: 30, type: "30-min HIIT",
-                description: "Mix high torque low cadence with lightning fast high cadence sprints.",
+                id: 9, name: "Resistance Ladder 30", category: "Interval",
+                description: "Add resistance every four minutes, then flush the legs out.",
                 steps: [
-                    { name: "Warm Up", level: 2, duration: 300 },
-                    { name: "Torque Effort", level: 9, duration: 120 },
-                    { name: "Recovery", level: 2, duration: 180 },
-                    { name: "Speed Sprint", level: 10, duration: 60 },
-                    { name: "Recovery", level: 2, duration: 180 },
-                    { name: "Torque Effort", level: 9, duration: 120 },
-                    { name: "Recovery", level: 2, duration: 180 },
-                    { name: "Speed Sprint", level: 10, duration: 60 },
-                    { name: "Cool Down", level: 1, duration: 600 }
+                    step("Warm Up", 2, "5:00"),
+                    step("Climb 1", 5, "4:00"),
+                    step("Climb 2", 6, "4:00"),
+                    step("Climb 3", 7, "4:00"),
+                    step("Climb 4", 8, "4:00"),
+                    step("Flush", 2, "4:00"),
+                    step("Cool Down", 1, "5:00")
                 ]
             },
             {
-                id: 9, name: "Tempo Cruise 40", duration: 40, type: "40-min Endurance",
-                description: "Sustained comfortable-hard pace designed to enhance aerobic efficiency.",
+                id: 10, name: "VO2 Max Intervals 30", category: "Interval",
+                description: "Three hard three-minute efforts with full recoveries to lift your aerobic ceiling.",
                 steps: [
-                    { name: "Warm Up", level: 2, duration: 600 },
-                    { name: "Tempo Block 1", level: 5, duration: 900 },
-                    { name: "Recovery Float", level: 3, duration: 300 },
-                    { name: "Tempo Block 2", level: 6, duration: 900 },
-                    { name: "Cool Down", level: 1, duration: 600 }
+                    step("Warm Up", 2, "8:00"),
+                    ...sets(3, ["VO2 Effort", 9, "3:00"], ["Full Rest", 1, "3:00"]),
+                    step("Cool Down", 1, "7:00")
                 ]
             },
             {
-                id: 10, name: "Pyramid Peak 30", duration: 30, type: "30-min HIIT",
-                description: "Escalate intensity step by step up to maximum, then step back down.",
+                id: 11, name: "Threshold 2x10 40", category: "Interval",
+                description: "Two ten-minute blocks right at threshold. Controlled, hard and steady.",
                 steps: [
-                    { name: "Warm Up", level: 2, duration: 300 },
-                    { name: "Step Up 1", level: 4, duration: 180 },
-                    { name: "Step Up 2", level: 6, duration: 180 },
-                    { name: "Peak Effort", level: 9, duration: 180 },
-                    { name: "Step Down 1", level: 6, duration: 180 },
-                    { name: "Step Down 2", level: 4, duration: 180 },
-                    { name: "Cool Down", level: 1, duration: 300 }
+                    step("Warm Up", 2, "8:00"),
+                    step("Threshold 1", 7, "10:00"),
+                    step("Recovery", 2, "4:00"),
+                    step("Threshold 2", 7, "10:00"),
+                    step("Cool Down", 1, "8:00")
                 ]
             },
             {
-                id: 11, name: "Over-Under Threshold 35", duration: 35, type: "35-min Threshold",
-                description: "Alternating slightly above and slightly below threshold power zones.",
+                id: 12, name: "Over-Unders 40", category: "Interval",
+                description: "Alternate just under and just over threshold to learn to clear and hold effort.",
                 steps: [
-                    { name: "Warm Up", level: 2, duration: 300 },
-                    { name: "Under Zone", level: 6, duration: 300 },
-                    { name: "Over Zone", level: 8, duration: 180 },
-                    { name: "Under Zone", level: 6, duration: 300 },
-                    { name: "Over Zone", level: 8, duration: 180 },
-                    { name: "Recovery", level: 2, duration: 180 },
-                    { name: "Cool Down", level: 1, duration: 560 }
+                    step("Warm Up", 2, "8:00"),
+                    ...overUnders(),
+                    step("Recovery", 2, "4:00"),
+                    ...overUnders(),
+                    step("Cool Down", 1, "4:00")
                 ]
             },
             {
-                id: 12, name: "Micro-Burst Accelerator 25", duration: 25, type: "25-min HIIT",
-                description: "Short 15-second explosive bursts followed by quick recoveries.",
+                id: 13, name: "Sweet Spot 2x12 40", category: "Interval",
+                description: "Two twelve-minute sweet spot blocks. Big fitness gain for the time spent.",
                 steps: [
-                    { name: "Warm Up", level: 2, duration: 300 },
-                    { name: "Burst 1", level: 10, duration: 15 },
-                    { name: "Float", level: 2, duration: 45 },
-                    { name: "Burst 2", level: 10, duration: 15 },
-                    { name: "Float", level: 2, duration: 45 },
-                    { name: "Burst 3", level: 10, duration: 15 },
-                    { name: "Float", level: 2, duration: 45 },
-                    { name: "Burst 4", level: 10, duration: 15 },
-                    { name: "Float", level: 2, duration: 45 },
-                    { name: "Steady Cruise", level: 4, duration: 400 },
-                    { name: "Cool Down", level: 1, duration: 385 }
+                    step("Warm Up", 2, "8:00"),
+                    step("Sweet Spot 1", 6, "12:00"),
+                    step("Recovery", 2, "4:00"),
+                    step("Sweet Spot 2", 6, "12:00"),
+                    step("Cool Down", 1, "4:00")
+                ]
+            },
+
+            /* ---------- HIIT ---------- */
+            {
+                id: 14, name: "Tabata Double 20", category: "HIIT",
+                description: "Two classic Tabata blocks of 20 seconds all-out, 10 seconds rest.",
+                steps: [
+                    step("Warm Up", 2, "5:00"),
+                    ...sets(8, ["Sprint", 10, "0:20"], ["Rest", 1, "0:10"], true),
+                    step("Recovery", 2, "3:00"),
+                    ...sets(8, ["Sprint", 10, "0:20"], ["Rest", 1, "0:10"], true),
+                    step("Cool Down", 1, "4:00")
                 ]
             },
             {
-                id: 13, name: "The Long Grind 50", duration: 50, type: "50-min Endurance",
-                description: "Our longest standard session for building deep endurance reserves.",
+                id: 15, name: "Micro-Bursts 30", category: "HIIT",
+                description: "Three sets of 15-second explosive bursts with quick floats between them.",
                 steps: [
-                    { name: "Easy Spin", level: 2, duration: 600 },
-                    { name: "Steady Climb", level: 4, duration: 1200 },
-                    { name: "Tempo Block", level: 6, duration: 600 },
-                    { name: "Steady Cruise", level: 4, duration: 600 },
-                    { name: "Cool Down", level: 1, duration: 1000 }
+                    step("Warm Up", 2, "5:00"),
+                    ...sets(5, ["Burst", 10, "0:15"], ["Float", 2, "0:45"], true),
+                    step("Reset", 2, "3:00"),
+                    ...sets(5, ["Burst", 10, "0:15"], ["Float", 2, "0:45"], true),
+                    step("Reset", 2, "3:00"),
+                    ...sets(5, ["Burst", 10, "0:15"], ["Float", 2, "0:45"], true),
+                    step("Cool Down", 1, "4:00")
                 ]
             },
             {
-                id: 14, name: "V02 Max Builder 30", duration: 30, type: "30-min HIIT",
-                description: "Deep red-line efforts designed to expand your maximum oxygen intake capacity.",
+                id: 16, name: "Sprint 30/30 30", category: "HIIT",
+                description: "Two blocks of 30 seconds hard, 30 seconds easy. Simple and brutal.",
                 steps: [
-                    { name: "Warm Up", level: 2, duration: 360 },
-                    { name: "VO2 Effort 1", level: 9, duration: 180 },
-                    { name: "Full Rest", level: 1, duration: 180 },
-                    { name: "VO2 Effort 2", level: 10, duration: 180 },
-                    { name: "Full Rest", level: 1, duration: 180 },
-                    { name: "VO2 Effort 3", level: 10, duration: 180 },
-                    { name: "Full Rest", level: 1, duration: 180 },
-                    { name: "Cool Down", level: 1, duration: 360 }
+                    step("Warm Up", 2, "6:00"),
+                    ...sets(8, ["Sprint", 9, "0:30"], ["Easy", 2, "0:30"], true),
+                    step("Recovery", 2, "4:00"),
+                    ...sets(8, ["Sprint", 9, "0:30"], ["Easy", 2, "0:30"], true),
+                    step("Cool Down", 1, "4:00")
                 ]
             },
             {
-                id: 15, name: "Cadence Step-Up 30", duration: 30, type: "30-min Cycling",
-                description: "Progressive cadence ladder scaling leg speed phase by phase.",
+                id: 17, name: "HIIT Ladder 30", category: "HIIT",
+                description: "Work intervals climb from 30 seconds to two minutes, then step back down.",
                 steps: [
-                    { name: "Warm Up", level: 2, duration: 500 },
-                    { name: "Pace Step 1", level: 4, duration: 600 },
-                    { name: "Pace Step 2", level: 5, duration: 600 },
-                    { name: "Pace Step 3", level: 6, duration: 600 },
-                    { name: "Pace Step 4", level: 5, duration: 500 },
-                    { name: "Cool Down", level: 1, duration: 600 }
+                    step("Warm Up", 2, "5:00"),
+                    step("Ladder 30s", 9, "0:30"), step("Rest", 2, "1:30"),
+                    step("Ladder 60s", 9, "1:00"), step("Rest", 2, "1:30"),
+                    step("Ladder 90s", 9, "1:30"), step("Rest", 2, "1:30"),
+                    step("Ladder 120s", 10, "2:00"), step("Rest", 2, "1:30"),
+                    step("Ladder 90s", 9, "1:30"), step("Rest", 2, "1:30"),
+                    step("Ladder 60s", 9, "1:00"), step("Rest", 2, "1:30"),
+                    step("Ladder 30s", 9, "0:30"),
+                    step("Flush", 3, "3:00"),
+                    step("Cool Down", 1, "5:00")
                 ]
             },
             {
-                id: 16, name: "Power Climb & Descend 30", duration: 30, type: "30-min Cycling",
-                description: "Steep climbs followed by active breathing recoveries.",
+                id: 18, name: "Sprint Repeats 30", category: "HIIT",
+                description: "Six 45-second all-out sprints with long recoveries so every one counts.",
                 steps: [
-                    { name: "Warm Up", level: 2, duration: 300 },
-                    { name: "Climb 1", level: 7, duration: 300 },
-                    { name: "Descent", level: 2, duration: 180 },
-                    { name: "Climb 2", level: 8, duration: 300 },
-                    { name: "Descent", level: 2, duration: 180 },
-                    { name: "Climb 3 (Peak)", level: 10, duration: 180 },
-                    { name: "Descent", level: 3, duration: 180 },
-                    { name: "Cool Down", level: 1, duration: 380 }
+                    step("Warm Up", 2, "8:00"),
+                    ...sets(6, ["Sprint", 10, "0:45"], ["Recovery", 2, "2:15"], true),
+                    step("Cool Down", 1, "4:00")
                 ]
             },
             {
-                id: 17, name: "HIIT Ladder 30", duration: 30, type: "30-min HIIT",
-                description: "Escalating work intervals with steady recoveries.",
+                id: 19, name: "Hard Hill Repeats 40", category: "HIIT",
+                description: "Eight one-minute climbs on heavy resistance and low cadence.",
                 steps: [
-                    { name: "Warm Up", level: 2, duration: 300 },
-                    { name: "Step 1 (30s)", level: 8, duration: 30 },
-                    { name: "Rest", level: 2, duration: 90 },
-                    { name: "Step 2 (60s)", level: 8, duration: 60 },
-                    { name: "Rest", level: 2, duration: 90 },
-                    { name: "Step 3 (90s)", level: 9, duration: 90 },
-                    { name: "Rest", level: 2, duration: 90 },
-                    { name: "Step 4 (120s)", level: 9, duration: 120 },
-                    { name: "Rest", level: 2, duration: 120 },
-                    { name: "Step 5 (Max 60s)", level: 10, duration: 60 },
-                    { name: "Flush", level: 3, duration: 300 },
-                    { name: "Cool Down", level: 1, duration: 390 }
+                    step("Warm Up", 2, "8:00"),
+                    ...sets(8, ["Hill", 9, "1:00"], ["Descent", 2, "2:00"], true),
+                    step("Flush", 3, "4:00"),
+                    step("Cool Down", 1, "4:00")
                 ]
             },
             {
-                id: 18, name: "Endurance Horizon 40", duration: 40, type: "40-min Endurance",
-                description: "Long steady endurance ride with alternating cadence zones.",
+                id: 20, name: "Power Efforts 40", category: "HIIT",
+                description: "Five two-minute hard efforts. The toughest sustained HIIT session here.",
                 steps: [
-                    { name: "Easy Spin", level: 2, duration: 600 },
-                    { name: "Steady Zone 1", level: 4, duration: 600 },
-                    { name: "Tempo Surge", level: 6, duration: 300 },
-                    { name: "Steady Zone 2", level: 4, duration: 600 },
-                    { name: "Tempo Surge 2", level: 7, duration: 300 },
-                    { name: "Endurance Cruise", level: 3, duration: 600 },
-                    { name: "Cool Down", level: 1, duration: 400 }
-                ]
-            },
-            {
-                id: 19, name: "Sprint Factory 30", duration: 30, type: "30-min HIIT",
-                description: "Short powerful bursts designed to test top speed.",
-                steps: [
-                    { name: "Warm Up", level: 2, duration: 360 },
-                    { name: "Fast Effort 1", level: 9, duration: 60 },
-                    { name: "Easy", level: 2, duration: 120 },
-                    { name: "Fast Effort 2", level: 10, duration: 60 },
-                    { name: "Easy", level: 2, duration: 120 },
-                    { name: "Fast Effort 3", level: 9, duration: 60 },
-                    { name: "Easy", level: 2, duration: 120 },
-                    { name: "Fast Effort 4", level: 10, duration: 60 },
-                    { name: "Easy", level: 2, duration: 120 },
-                    { name: "Tempo Ride", level: 5, duration: 300 },
-                    { name: "All-Out Finisher", level: 10, duration: 60 },
-                    { name: "Cool Down", level: 1, duration: 420 }
-                ]
-            },
-            {
-                id: 20, name: "The Ultimate Finisher 40", duration: 40, type: "40-min Endurance",
-                description: "A complete structured tour containing warm-up, mid-climbs, and hard finish.",
-                steps: [
-                    { name: "Warm Up", level: 2, duration: 600 },
-                    { name: "Tempo Build", level: 5, duration: 600 },
-                    { name: "Hard Effort", level: 7, duration: 400 },
-                    { name: "Recovery", level: 3, duration: 300 },
-                    { name: "Attack Phase", level: 9, duration: 300 },
-                    { name: "Recovery", level: 3, duration: 200 },
-                    { name: "Max Sprint Out", level: 10, duration: 120 },
-                    { name: "Cool Down", level: 1, duration: 580 }
+                    step("Warm Up", 2, "8:00"),
+                    ...sets(5, ["Effort", 9, "2:00"], ["Recovery", 2, "3:00"], true),
+                    step("Flush", 3, "3:00"),
+                    step("Cool Down", 1, "4:00")
                 ]
             }
         ];
 
+        const $ = id => document.getElementById(id);
+
+        const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+        // Pick white or dark text, whichever contrasts better with the level colour (WCAG)
+        function textOn(hex) {
+            const lum = h => {
+                const [r, g, b] = [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255)
+                    .map(v => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
+                return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+            };
+            const l = lum(hex);
+            return (1.05) / (l + 0.05) >= (l + 0.05) / (lum('#0f172a') + 0.05) ? '#ffffff' : '#0f172a';
+        }
+
+        const colorFor = level => levelColors[level] || '#3b82f6';
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        // Derive everything from the steps so the listed numbers always match what the player runs
+        workouts.forEach(w => {
+            w.totalSec = w.steps.reduce((a, s) => a + s.duration, 0);
+            w.avgLevel = w.steps.reduce((a, s) => a + s.level * s.duration, 0) / w.totalSec;
+            w.peakLevel = Math.max(...w.steps.map(s => s.level));
+        });
+
+        function durationLabel(sec) {
+            return `${Math.round(sec / 60)} Mins`;
+        }
+
+        // Bar chart of the steps: width = duration, height = level
+        function buildProfile(el, steps, withPlayhead) {
+            el.innerHTML = '';
+            steps.forEach(s => {
+                const bar = document.createElement('div');
+                bar.className = 'profile-bar';
+                bar.style.flex = `${s.duration} 1 0`;
+                bar.style.height = `${s.level * 10}%`;
+                bar.style.background = colorFor(s.level);
+                bar.title = `${s.name} · Lvl ${s.level} · ${formatTime(s.duration)}`;
+                el.appendChild(bar);
+            });
+            if (withPlayhead) {
+                const head = document.createElement('div');
+                head.className = 'profile-playhead';
+                el.appendChild(head);
+            }
+        }
+
         class WorkoutApp {
             constructor() {
                 this.currentWorkout = null;
-                this.currentStepIndex = 0;
-                this.timeLeftInStep = 0;
-                this.totalTimeLeft = 0;
-                this.totalWorkoutDuration = 0;
-                this.timerInterval = null;
-                this.isPaused = true;
-                this.audioCtx = null;
                 this.pendingWorkout = null;
+                this.currentStepIndex = 0;
+                this.ends = [];            // cumulative end of each step, in ms
+                this.totalMs = 0;
+                this.elapsedBase = 0;      // session position (ms) as of the last pause/seek
+                this.runStart = null;      // Date.now() when the clock last started, null when paused
+                this.activeMs = 0;         // real time actually spent running
+                this.lastSec = 0;
+                this.isPaused = true;
+                this.timerInterval = null;
+                this.audioCtx = null;
+                this.wakeLock = null;
+                this.wakePending = false;
+                this.confirmCtx = null;
+                this.lastFocus = null;
 
-                this.initList();
-            }
-
-            initAudio() {
-                if (!this.audioCtx) {
-                    this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                }
-            }
-
-            playBeep(frequency = 587.33, duration = 0.15, type = 'sine') {
+                this.filters = { type: 'All', search: '', sort: 'default' };
+                this.prefs = { sound: true, voice: false, vibrate: true };
                 try {
-                    this.initAudio();
-                    if (this.audioCtx.state === 'suspended') {
-                        this.audioCtx.resume();
+                    Object.assign(this.prefs, JSON.parse(localStorage.getItem('workoutPrefs') || '{}'));
+                } catch (e) { /* storage unavailable */ }
+
+                this.initPrefs();
+                this.initBrowse();
+                this.initKeys();
+
+                document.addEventListener('visibilitychange', () => {
+                    if (document.visibilityState !== 'visible') return;
+                    if (this.currentWorkout && !this.isPaused) {
+                        this.acquireWakeLock();   // locks are dropped when the page is hidden
+                        this.tick();
                     }
-                    const osc = this.audioCtx.createOscillator();
-                    const gain = this.audioCtx.createGain();
-                    osc.type = type;
-                    osc.frequency.value = frequency;
-                    gain.gain.setValueAtTime(0.15, this.audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.0001, this.audioCtx.currentTime + duration);
-                    osc.connect(gain);
-                    gain.connect(this.audioCtx.destination);
-                    osc.start();
-                    osc.stop(this.audioCtx.currentTime + duration);
-                } catch (e) {
-                    console.log("Audio not allowed yet");
-                }
-            }
-
-            initList() {
-                const listEl = document.getElementById('workout-list');
-                listEl.innerHTML = '';
-
-                workouts.forEach(w => {
-                    const card = document.createElement('div');
-                    card.className = 'workout-card';
-                    card.innerHTML = `
-                        <div class="workout-info">
-                            <h3>${w.id}. ${w.name}</h3>
-                            <p>${w.description}</p>
-                        </div>
-                        <div class="workout-meta">
-                            <span class="badge" style="background: #3b82f6; color: white;">${w.duration} Mins</span>
-                            <span class="badge" style="background: #334155; color: #cbd5e1;">${w.steps.length} Steps</span>
-                        </div>
-                    `;
-                    card.onclick = () => this.openPreview(w);
-                    listEl.appendChild(card);
                 });
             }
 
-            openPreview(workout) {
+            /* ---------- Audio / cues ---------- */
+
+            initAudio() {
+                try {
+                    if (!this.audioCtx) {
+                        this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    }
+                    if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+                } catch (e) { /* audio unavailable */ }
+            }
+
+            playBeep(frequency = 587.33, duration = 0.15, type = 'sine') {
+                if (!this.prefs.sound || !this.audioCtx) return;
+                try {
+                    const ctx = this.audioCtx;
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.value = frequency;
+                    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    osc.stop(ctx.currentTime + duration);
+                } catch (e) { /* ignore */ }
+            }
+
+            vibrate(pattern) {
+                if (!this.prefs.vibrate) return;
+                try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (e) { /* ignore */ }
+            }
+
+            speak(text) {
+                if (!this.prefs.voice || !('speechSynthesis' in window)) return;
+                try {
+                    speechSynthesis.cancel();
+                    speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+                } catch (e) { /* ignore */ }
+            }
+
+            announce(text) {
+                $('sr-status').textContent = text;
+            }
+
+            initPrefs() {
+                document.querySelectorAll('[data-pref]').forEach(btn => {
+                    const key = btn.dataset.pref;
+                    btn.setAttribute('aria-pressed', String(!!this.prefs[key]));
+                    btn.addEventListener('click', () => {
+                        this.prefs[key] = !this.prefs[key];
+                        btn.setAttribute('aria-pressed', String(this.prefs[key]));
+                        try { localStorage.setItem('workoutPrefs', JSON.stringify(this.prefs)); } catch (e) { /* ignore */ }
+                        this.initAudio();
+                        if (this.prefs[key]) {
+                            if (key === 'sound') this.playBeep(660, 0.12);
+                            if (key === 'voice') this.speak('Voice cues on');
+                            if (key === 'vibrate') this.vibrate(80);
+                        } else if (key === 'voice' && 'speechSynthesis' in window) {
+                            speechSynthesis.cancel();
+                        }
+                    });
+                });
+            }
+
+            /* ---------- Wake lock ---------- */
+
+            async acquireWakeLock() {
+                if (!('wakeLock' in navigator) || this.wakeLock || this.wakePending) return;
+                this.wakePending = true;
+                try {
+                    const lock = await navigator.wakeLock.request('screen');
+                    if (this.isPaused || !this.currentWorkout) {
+                        lock.release().catch(() => {});
+                    } else {
+                        this.wakeLock = lock;
+                        lock.addEventListener('release', () => { if (this.wakeLock === lock) this.wakeLock = null; });
+                    }
+                } catch (e) { /* denied or unsupported */ }
+                this.wakePending = false;
+            }
+
+            releaseWakeLock() {
+                if (this.wakeLock) {
+                    this.wakeLock.release().catch(() => {});
+                    this.wakeLock = null;
+                }
+            }
+
+            /* ---------- Browse list ---------- */
+
+            initBrowse() {
+                const chipsEl = $('type-chips');
+                const cats = ['All', ...new Set(workouts.map(w => w.category))];
+                cats.forEach(cat => {
+                    const chip = document.createElement('button');
+                    chip.type = 'button';
+                    chip.className = 'chip';
+                    chip.textContent = cat;
+                    chip.setAttribute('aria-pressed', String(cat === 'All'));
+                    chip.addEventListener('click', () => {
+                        this.filters.type = cat;
+                        chipsEl.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', String(c === chip)));
+                        this.renderList();
+                    });
+                    chipsEl.appendChild(chip);
+                });
+
+                $('search-input').addEventListener('input', e => {
+                    this.filters.search = e.target.value.trim().toLowerCase();
+                    this.renderList();
+                });
+                $('sort-select').addEventListener('change', e => {
+                    this.filters.sort = e.target.value;
+                    this.renderList();
+                });
+
+                this.renderList();
+            }
+
+            renderList() {
+                const { type, search, sort } = this.filters;
+                let list = workouts.filter(w =>
+                    (type === 'All' || w.category === type) &&
+                    (!search || `${w.name} ${w.description} ${w.category}`.toLowerCase().includes(search)));
+
+                const sorters = {
+                    'duration-asc': (a, b) => a.totalSec - b.totalSec,
+                    'duration-desc': (a, b) => b.totalSec - a.totalSec,
+                    'intensity-desc': (a, b) => b.avgLevel - a.avgLevel,
+                    'name': (a, b) => a.name.localeCompare(b.name)
+                };
+                if (sorters[sort]) list = [...list].sort(sorters[sort]);
+
+                const listEl = $('workout-list');
+                listEl.innerHTML = '';
+
+                list.forEach(w => {
+                    const card = document.createElement('div');
+                    card.className = 'workout-card';
+                    card.tabIndex = 0;
+                    card.setAttribute('role', 'button');
+                    card.setAttribute('aria-label', `${w.name}, ${durationLabel(w.totalSec)}, ${w.steps.length} steps. Preview workout`);
+                    card.innerHTML = `
+                        <div class="workout-info">
+                            <h3>${esc(w.name)}</h3>
+                            <p>${esc(w.description)}</p>
+                        </div>
+                        <div class="profile mini" aria-hidden="true"></div>
+                        <div class="workout-meta">
+                            <span class="badge badge-primary">${durationLabel(w.totalSec)}</span>
+                            <span class="badge badge-muted">${w.steps.length} Steps</span>
+                            <span class="badge badge-muted">${esc(w.category)}</span>
+                        </div>
+                    `;
+                    buildProfile(card.querySelector('.profile'), w.steps, false);
+                    card.addEventListener('click', () => this.openPreview(w, card));
+                    card.addEventListener('keydown', e => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            this.openPreview(w, card);
+                        }
+                    });
+                    listEl.appendChild(card);
+                });
+
+                if (!list.length) {
+                    const empty = document.createElement('div');
+                    empty.className = 'empty-state';
+                    empty.textContent = 'No workouts match your search.';
+                    listEl.appendChild(empty);
+                }
+
+                $('result-count').textContent = `${list.length} of ${workouts.length} workouts`;
+            }
+
+            /* ---------- Modals ---------- */
+
+            showModal(id, focusId) {
+                this.lastFocus = document.activeElement;
+                $(id).style.display = 'flex';
+                const target = focusId ? $(focusId) : $(id).querySelector('button');
+                if (target) target.focus();
+            }
+
+            hideModal(id) {
+                $(id).style.display = 'none';
+                if (this.lastFocus && document.contains(this.lastFocus) && this.lastFocus.offsetParent !== null) {
+                    try { this.lastFocus.focus(); } catch (e) { /* ignore */ }
+                }
+            }
+
+            openPreview(workout, opener) {
                 this.pendingWorkout = workout;
-                document.getElementById('modal-title').innerText = workout.name;
-                document.getElementById('modal-desc').innerText = workout.description;
-                document.getElementById('modal-badge-duration').innerText = `${workout.duration} Mins`;
-                document.getElementById('modal-badge-steps').innerText = `${workout.steps.length} Steps`;
+                $('modal-title').textContent = workout.name;
+                $('modal-desc').textContent = workout.description;
+                $('modal-badge-duration').textContent = `${durationLabel(workout.totalSec)} (${formatTime(workout.totalSec)})`;
+                $('modal-badge-steps').textContent = `${workout.steps.length} Steps`;
+                buildProfile($('modal-profile'), workout.steps, false);
 
-                const stepsListEl = document.getElementById('modal-steps-list');
+                const stepsListEl = $('modal-steps-list');
                 stepsListEl.innerHTML = '';
-
                 workout.steps.forEach((step, idx) => {
+                    const color = colorFor(step.level);
                     const item = document.createElement('li');
                     item.className = 'step-preview-item';
-                    const color = levelColors[step.level] || '#3b82f6';
                     item.style.borderLeftColor = color;
                     item.innerHTML = `
-                        <span><strong>${idx + 1}. ${step.name}</strong></span>
+                        <span><strong>${idx + 1}. ${esc(step.name)}</strong></span>
                         <div>
-                            <span class="badge" style="background: ${color}; color: white; margin-right: 0.5rem;">Lvl ${step.level}</span>
-                            <span style="color: var(--text-muted); font-size: 0.85rem;">${this.formatTime(step.duration)}</span>
+                            <span class="badge step-level" style="background: ${color}; color: ${textOn(color)};">Lvl ${step.level}</span>
+                            <span class="step-time">${formatTime(step.duration)}</span>
                         </div>
                     `;
                     stepsListEl.appendChild(item);
                 });
 
-                document.getElementById('preview-modal').style.display = 'flex';
+                this.showModal('preview-modal', 'modal-start-btn');
+                if (opener) this.lastFocus = opener;
             }
 
             closeModal() {
-                document.getElementById('preview-modal').style.display = 'none';
+                this.hideModal('preview-modal');
                 this.pendingWorkout = null;
+            }
+
+            showConfirm({ title, desc, okLabel, cancelLabel, onOk, onCancel }) {
+                $('confirm-title').textContent = title;
+                $('confirm-desc').textContent = desc;
+                $('confirm-ok-btn').textContent = okLabel;
+                $('confirm-keep-btn').textContent = cancelLabel;
+                this.confirmCtx = { onOk, onCancel };
+                this.showModal('confirm-modal', 'confirm-keep-btn');
+            }
+
+            cancelExit() {
+                const ctx = this.confirmCtx;
+                this.confirmCtx = null;
+                this.hideModal('confirm-modal');
+                if (ctx && ctx.onCancel) ctx.onCancel();
+                const pb = $('pause-btn');
+                if (pb && $('active-session').style.display === 'block') pb.focus();
+            }
+
+            confirmExit() {
+                const ctx = this.confirmCtx;
+                this.confirmCtx = null;
+                this.hideModal('confirm-modal');
+                if (ctx && ctx.onOk) ctx.onOk();
+            }
+
+            anyModalOpen() {
+                return $('preview-modal').style.display === 'flex' || $('confirm-modal').style.display === 'flex';
+            }
+
+            /* ---------- Session clock ---------- */
+
+            elapsed() {
+                return this.elapsedBase + (this.runStart ? Date.now() - this.runStart : 0);
+            }
+
+            hasStarted() {
+                return this.elapsed() > 0 || this.activeMs > 0;
+            }
+
+            // Fold the running time into the base so the position can be moved safely
+            commitRun() {
+                if (!this.runStart) return;
+                const now = Date.now();
+                const delta = now - this.runStart;
+                this.elapsedBase += delta;
+                this.activeMs += delta;
+                this.runStart = now;
+            }
+
+            indexAt(ms) {
+                for (let i = 0; i < this.ends.length; i++) {
+                    if (ms < this.ends[i]) return i;
+                }
+                return this.ends.length - 1;
+            }
+
+            stepStart(idx) {
+                return idx === 0 ? 0 : this.ends[idx - 1];
             }
 
             confirmStartWorkout() {
                 if (!this.pendingWorkout) return;
                 const workout = this.pendingWorkout;
+                this.initAudio();   // created inside the click so the browser lets it play
                 this.closeModal();
+                this.beginSession(workout);
+            }
 
+            repeatWorkout() {
+                if (!this.currentWorkout) return;
+                this.initAudio();
+                this.beginSession(this.currentWorkout);
+            }
+
+            beginSession(workout) {
+                this.stopClock();
                 this.currentWorkout = workout;
+                let acc = 0;
+                this.ends = workout.steps.map(s => (acc += s.duration * 1000));
+                this.totalMs = acc;
+                this.elapsedBase = 0;
+                this.activeMs = 0;
+                this.runStart = null;
+                this.isPaused = true;
                 this.currentStepIndex = 0;
-                this.isPaused = true; 
-                document.getElementById('pause-btn').innerText = "Start/Resume";
 
-                this.totalWorkoutDuration = workout.steps.reduce((acc, step) => acc + step.duration, 0);
-                this.totalTimeLeft = this.totalWorkoutDuration;
+                buildProfile($('session-profile'), workout.steps, true);
 
-                // Hide header and list, show active session
-                document.getElementById('app-header').style.display = 'none';
-                document.getElementById('workout-list').style.display = 'none';
-                document.getElementById('active-session').style.display = 'block';
+                $('browse-view').style.display = 'none';
+                $('complete-screen').style.display = 'none';
+                $('active-session').style.display = 'block';
 
-                this.loadStep(0);
-                this.startTimer();
+                this.loadStep(0, false);
+                this.updatePausedUI();
+                this.updateDisplay(0);
+                $('pause-btn').focus();
             }
 
-            loadStep(index) {
+            loadStep(index, cue) {
                 const step = this.currentWorkout.steps[index];
-                this.timeLeftInStep = step.duration;
+                const steps = this.currentWorkout.steps;
+                this.currentStepIndex = index;
+                this.lastSec = Math.ceil((this.ends[index] - this.elapsed()) / 1000);
 
-                document.getElementById('step-name').innerText = step.name;
-                document.getElementById('step-intensity-label').innerText = `Intensity Level: ${step.level} / 10`;
-                document.getElementById('current-phase-indicator').innerText = `Phase ${index + 1} of ${this.currentWorkout.steps.length}`;
+                const color = colorFor(step.level);
+                const banner = $('intensity-banner');
+                banner.style.backgroundColor = color;
+                banner.style.color = textOn(color);
+                banner.classList.toggle('pulsing', step.level >= 9 && !this.isPaused);
 
-                const banner = document.getElementById('intensity-banner');
-                const colorHex = levelColors[step.level] || '#3b82f6';
-                banner.style.backgroundColor = colorHex;
+                $('step-name').textContent = step.name;
+                $('step-intensity-label').textContent = `Intensity Level: ${step.level} / 10`;
+                $('current-phase-indicator').textContent = `Phase ${index + 1} of ${steps.length}`;
 
-                if (step.level >= 9) {
-                    banner.classList.add('pulsing');
-                } else {
-                    banner.classList.remove('pulsing');
+                const next = steps[index + 1];
+                $('next-preview-text').textContent = next
+                    ? `Up Next: ${next.name} (Lvl ${next.level}) — ${formatTime(next.duration)}`
+                    : 'Final Step of Session!';
+
+                $('session-profile').querySelectorAll('.profile-bar').forEach((bar, i) => {
+                    bar.classList.toggle('done', i < index);
+                    bar.classList.toggle('current', i === index);
+                });
+
+                this.announce(`${step.name}. Level ${step.level} of 10. ${formatTime(step.duration)}.`);
+
+                if (cue && !this.isPaused) {
+                    this.playBeep(880, 0.25, 'triangle');
+                    this.vibrate([200]);
+                }
+            }
+
+            tick() {
+                if (!this.currentWorkout || this.isPaused) return;
+                const el = this.elapsed();
+                if (el >= this.totalMs) {
+                    this.finishWorkout();
+                    return;
                 }
 
-                const nextPreviewEl = document.getElementById('next-preview-text');
-                if (index + 1 < this.currentWorkout.steps.length) {
-                    const nextStep = this.currentWorkout.steps[index + 1];
-                    nextPreviewEl.innerText = `Up Next: ${nextStep.name} (Lvl ${nextStep.level}) — ${this.formatTime(nextStep.duration)}`;
-                } else {
-                    nextPreviewEl.innerText = `Final Step of Session!`;
+                const idx = this.indexAt(el);
+                if (idx !== this.currentStepIndex) this.loadStep(idx, true);
+
+                const secLeft = Math.ceil((this.ends[idx] - el) / 1000);
+                if (secLeft < this.lastSec) {
+                    this.lastSec = secLeft;
+                    this.warnCue(secLeft);
                 }
-
-                this.updateDisplay();
+                this.updateDisplay(el);
             }
 
-            startTimer() {
-                if (this.timerInterval) clearInterval(this.timerInterval);
-
-                this.timerInterval = setInterval(() => {
-                    if (this.isPaused) return;
-
-                    if (this.timeLeftInStep > 0) {
-                        if (this.timeLeftInStep <= 4 && this.timeLeftInStep > 1) {
-                            this.playBeep(440, 0.1, 'sine');
-                        } else if (this.timeLeftInStep === 1) {
-                            this.playBeep(880, 0.2, 'triangle');
-                        }
-
-                        this.timeLeftInStep--;
-                        this.totalTimeLeft--;
-                        this.updateDisplay();
-                    } else {
-                        this.currentStepIndex++;
-                        if (this.currentStepIndex < this.currentWorkout.steps.length) {
-                            this.loadStep(this.currentStepIndex);
-                        } else {
-                            this.finishWorkout();
-                        }
-                    }
-                }, 1000);
+            // A few seconds before a step change: beeps, a buzz, and a spoken heads-up
+            warnCue(secLeft) {
+                const steps = this.currentWorkout.steps;
+                const next = steps[this.currentStepIndex + 1];
+                if (secLeft === 5) {
+                    this.speak(next ? `Next: ${next.name}, level ${next.level}` : 'Last step. Almost done.');
+                } else if (secLeft === 3 || secLeft === 2) {
+                    this.playBeep(440, 0.1, 'sine');
+                    if (secLeft === 3) this.vibrate([60]);
+                } else if (secLeft === 1) {
+                    this.playBeep(660, 0.12, 'sine');
+                }
             }
 
-            updateDisplay() {
-                document.getElementById('section-timer').innerText = this.formatTime(this.timeLeftInStep);
-                document.getElementById('overall-timer-text').innerText = `Total Remaining: ${this.formatTime(this.totalTimeLeft)}`;
+            updateDisplay(el) {
+                const stepLeft = Math.max(0, Math.ceil((this.ends[this.currentStepIndex] - el) / 1000));
+                const totalLeft = Math.max(0, Math.ceil((this.totalMs - el) / 1000));
+                $('section-timer').textContent = formatTime(stepLeft);
+                $('overall-timer-text').textContent = `Total Remaining: ${formatTime(totalLeft)}`;
 
-                const elapsed = this.totalWorkoutDuration - this.totalTimeLeft;
-                const percent = Math.min(100, Math.max(0, (elapsed / this.totalWorkoutDuration) * 100));
-                document.getElementById('overall-progress').style.width = `${percent}%`;
+                const pct = Math.min(100, Math.max(0, (el / this.totalMs) * 100));
+                $('overall-progress').style.width = `${pct}%`;
+                const head = $('session-profile').querySelector('.profile-playhead');
+                if (head) head.style.left = `${pct}%`;
             }
 
-            formatTime(seconds) {
-                const mins = Math.floor(seconds / 60);
-                const secs = seconds % 60;
-                return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            updatePausedUI() {
+                const started = this.hasStarted();
+                const session = $('active-session');
+                session.classList.toggle('paused', this.isPaused);
+                $('intensity-banner').classList.toggle('is-paused', this.isPaused);
+                if (this.currentWorkout) {
+                    const lvl = this.currentWorkout.steps[this.currentStepIndex].level;
+                    $('intensity-banner').classList.toggle('pulsing', lvl >= 9 && !this.isPaused);
+                }
+                $('pause-btn').textContent = this.isPaused ? (started ? '▶ Resume' : '▶ Start') : '⏸ Pause';
+                $('paused-flag').textContent = this.isPaused ? (started ? '⏸ Paused' : 'Ready — press Start when you are') : '';
             }
 
             togglePause() {
-                this.isPaused = !this.isPaused;
-                document.getElementById('pause-btn').innerText = this.isPaused ? "Start/Resume" : "Pause";
+                if (!this.currentWorkout) return;
+                this.initAudio();
+                if (this.isPaused) this.resume(); else this.pause();
+            }
+
+            resume() {
+                if (!this.isPaused) return;
+                this.isPaused = false;
+                this.runStart = Date.now();
+                if (this.timerInterval) clearInterval(this.timerInterval);
+                this.timerInterval = setInterval(() => this.tick(), 250);
+                this.acquireWakeLock();
+                this.updatePausedUI();
+                this.announce('Resumed');
+            }
+
+            pause() {
+                if (this.isPaused) return;
+                this.commitRun();
+                this.runStart = null;
+                this.isPaused = true;
+                this.stopClock();
+                this.releaseWakeLock();
+                if ('speechSynthesis' in window) { try { speechSynthesis.cancel(); } catch (e) { /* ignore */ } }
+                this.updatePausedUI();
+                this.updateDisplay(this.elapsedBase);
+                this.announce('Paused');
+            }
+
+            stopClock() {
+                if (this.timerInterval) {
+                    clearInterval(this.timerInterval);
+                    this.timerInterval = null;
+                }
+            }
+
+            seek(ms) {
+                this.commitRun();
+                this.elapsedBase = Math.min(Math.max(0, ms), this.totalMs - 1);
+                const idx = this.indexAt(this.elapsedBase);
+                this.loadStep(idx, false);
+                this.updateDisplay(this.elapsedBase);
             }
 
             nextStep() {
-                if (this.currentStepIndex + 1 < this.currentWorkout.steps.length) {
-                    const currentStep = this.currentWorkout.steps[this.currentStepIndex];
-                    this.totalTimeLeft -= this.timeLeftInStep;
-                    this.currentStepIndex++;
-                    this.loadStep(this.currentStepIndex);
+                if (!this.currentWorkout) return;
+                const i = this.currentStepIndex;
+                if (i + 1 < this.currentWorkout.steps.length) {
+                    this.seek(this.ends[i]);
                 } else {
-                    this.finishWorkout();
+                    const wasRunning = !this.isPaused;
+                    this.pause();
+                    this.showConfirm({
+                        title: 'Finish workout?',
+                        desc: 'This is the last step. Finish now and see your summary?',
+                        okLabel: 'Finish',
+                        cancelLabel: 'Keep Going',
+                        onOk: () => this.finishWorkout(),
+                        onCancel: () => { if (wasRunning) this.resume(); }
+                    });
                 }
             }
 
+            // Restart the step if it is more than 3s in, otherwise go back one step
             prevStep() {
-                if (this.currentStepIndex > 0) {
-                    const currentStep = this.currentWorkout.steps[this.currentStepIndex];
-                    this.totalTimeLeft += (currentStep.duration - this.timeLeftInStep);
-                    this.currentStepIndex--;
-                    this.loadStep(this.currentStepIndex);
-                }
+                if (!this.currentWorkout) return;
+                const i = this.currentStepIndex;
+                const into = this.elapsed() - this.stepStart(i);
+                if (into > 3000 || i === 0) this.seek(this.stepStart(i));
+                else this.seek(this.stepStart(i - 1));
             }
 
             restartStep() {
-                const step = this.currentWorkout.steps[this.currentStepIndex];
-                this.totalTimeLeft += (step.duration - this.timeLeftInStep);
-                this.timeLeftInStep = step.duration;
-                this.updateDisplay();
+                if (!this.currentWorkout) return;
+                this.seek(this.stepStart(this.currentStepIndex));
+            }
+
+            /* ---------- Exit / finish ---------- */
+
+            requestExit() {
+                if (!this.currentWorkout) return;
+                if (!this.hasStarted()) {
+                    this.exitWorkout();
+                    return;
+                }
+                const wasRunning = !this.isPaused;
+                this.pause();
+                this.showConfirm({
+                    title: 'End workout?',
+                    desc: 'Your progress in this session will be lost.',
+                    okLabel: 'End Workout',
+                    cancelLabel: 'Keep Going',
+                    onOk: () => this.exitWorkout(),
+                    onCancel: () => { if (wasRunning) this.resume(); }
+                });
             }
 
             exitWorkout() {
-                if (this.timerInterval) clearInterval(this.timerInterval);
-                document.getElementById('active-session').style.display = 'none';
-                document.getElementById('app-header').style.display = 'block';
-                document.getElementById('workout-list').style.display = 'grid';
+                this.stopClock();
+                this.releaseWakeLock();
+                if ('speechSynthesis' in window) { try { speechSynthesis.cancel(); } catch (e) { /* ignore */ } }
+                this.runStart = null;
+                this.isPaused = true;
+                $('active-session').style.display = 'none';
+                $('complete-screen').style.display = 'none';
+                $('browse-view').style.display = 'block';
+                $('intensity-banner').classList.remove('pulsing');
+            }
+
+            backToList() {
+                this.exitWorkout();
             }
 
             finishWorkout() {
-                if (this.timerInterval) clearInterval(this.timerInterval);
+                if (!this.currentWorkout) return;
+                this.commitRun();
+                this.runStart = null;
+                this.isPaused = true;
+                this.stopClock();
+                this.releaseWakeLock();
+                $('intensity-banner').classList.remove('pulsing');
+
                 this.playBeep(523.25, 0.2);
                 setTimeout(() => this.playBeep(659.25, 0.2), 200);
                 setTimeout(() => this.playBeep(783.99, 0.4), 400);
+                this.vibrate([200, 100, 200, 100, 400]);
+                this.speak('Workout complete. Nice work.');
 
-                alert("🎉 Workout Completed Successfully!");
-                this.exitWorkout();
+                const w = this.currentWorkout;
+                $('complete-name').textContent = w.name;
+                $('stat-active').textContent = formatTime(Math.round(this.activeMs / 1000));
+                $('stat-planned').textContent = formatTime(w.totalSec);
+                $('stat-avg').textContent = w.avgLevel.toFixed(1);
+                $('stat-peak').textContent = String(w.peakLevel);
+                buildProfile($('complete-profile'), w.steps, false);
+
+                $('active-session').style.display = 'none';
+                $('complete-screen').style.display = 'block';
+                $('complete-title').focus();
+                this.announce(`Workout complete. Active time ${formatTime(Math.round(this.activeMs / 1000))}.`);
+            }
+
+            /* ---------- Keyboard ---------- */
+
+            initKeys() {
+                const sessionActive = () => $('active-session').style.display === 'block' && !this.anyModalOpen();
+                const typing = t => t && (t.tagName === 'INPUT' || t.tagName === 'SELECT' || t.tagName === 'TEXTAREA');
+
+                document.addEventListener('keydown', e => {
+                    if (e.key === 'Escape') {
+                        if ($('confirm-modal').style.display === 'flex') { this.cancelExit(); e.preventDefault(); }
+                        else if ($('preview-modal').style.display === 'flex') { this.closeModal(); e.preventDefault(); }
+                        return;
+                    }
+
+                    // Keep Tab inside an open modal
+                    if (e.key === 'Tab' && this.anyModalOpen()) {
+                        const modal = $('confirm-modal').style.display === 'flex' ? $('confirm-modal') : $('preview-modal');
+                        const items = [...modal.querySelectorAll('button')].filter(b => b.offsetParent !== null);
+                        if (!items.length) return;
+                        const first = items[0], last = items[items.length - 1];
+                        if (e.shiftKey && document.activeElement === first) { last.focus(); e.preventDefault(); }
+                        else if (!e.shiftKey && document.activeElement === last) { first.focus(); e.preventDefault(); }
+                        return;
+                    }
+
+                    if (!sessionActive() || typing(e.target) || e.ctrlKey || e.metaKey || e.altKey) return;
+
+                    switch (e.key) {
+                        case ' ':
+                            e.preventDefault();
+                            this.togglePause();
+                            break;
+                        case 'ArrowLeft':
+                            e.preventDefault();
+                            this.prevStep();
+                            break;
+                        case 'ArrowRight':
+                            e.preventDefault();
+                            this.nextStep();
+                            break;
+                        case 'r':
+                        case 'R':
+                            this.restartStep();
+                            break;
+                    }
+                });
+
+                // Stop Space from also "clicking" whichever button has focus
+                document.addEventListener('keyup', e => {
+                    if (e.key === ' ' && sessionActive() && e.target.tagName === 'BUTTON') e.preventDefault();
+                });
+
+                // Click outside a dialog to dismiss the preview
+                $('preview-modal').addEventListener('click', e => {
+                    if (e.target === $('preview-modal')) this.closeModal();
+                });
             }
         }
 
